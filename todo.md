@@ -1,0 +1,4 @@
+- List organisations that you're a member of. Click to login to that org. (select-organisation.tsx route)
+- Login with Github
+- Login with Google
+- Logout
