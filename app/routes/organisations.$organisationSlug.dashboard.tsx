@@ -21,7 +21,6 @@ const loader = createServerFn()
     const stytch = useStytch();
 
     try {
-      // TODO: Check if we can call authenticateJwt here?
       const { session_jwt, member, organization } =
         await stytch.sessions.authenticate({
           session_duration_minutes: 30, // extend the session a bit
