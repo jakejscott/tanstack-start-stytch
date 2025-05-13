@@ -1,5 +1,5 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import loadStytch from "~/utils/loadStytch";
+import { useStytch } from "~/utils/stytch";
 import { useAppSession } from "~/utils/session";
 
 export const APIRoute = createAPIFileRoute("/api/authenticate")({
@@ -13,16 +13,30 @@ export const APIRoute = createAPIFileRoute("/api/authenticate")({
     console.log({ stytch_redirect_type, stytch_token_type });
 
     if (stytch_token_type === "discovery" && token) {
-      const stytchClient = loadStytch();
+      const stytch = useStytch();
 
-      let intermediate_session_token: string;
       try {
-        const authRes = await stytchClient.magicLinks.discovery.authenticate({
-          discovery_magic_links_token: token,
+        const { intermediate_session_token, email_address } =
+          await stytch.magicLinks.discovery.authenticate({
+            discovery_magic_links_token: token,
+          });
+
+        const session = await useAppSession();
+
+        await session.update({
+          intermediate_session_token: intermediate_session_token,
+          email_address: email_address,
         });
 
-        intermediate_session_token = authRes.intermediate_session_token;
+        return new Response("success", {
+          status: 307,
+          headers: {
+            location: "/discovery/select-organisation",
+          },
+        });
       } catch (error) {
+        console.log("discovery authenticate failed");
+
         return new Response("failed", {
           status: 307,
           headers: {
@@ -30,18 +44,6 @@ export const APIRoute = createAPIFileRoute("/api/authenticate")({
           },
         });
       }
-
-      const session = await useAppSession();
-      await session.update({
-        intermediate_session_token: intermediate_session_token,
-      });
-
-      return new Response("success", {
-        status: 307,
-        headers: {
-          location: "/select-organisation",
-        },
-      });
     } else {
       throw new Error("Unhandle auth callback");
     }

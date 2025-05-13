@@ -1,13 +1,8 @@
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useAppSession } from "~/utils/session";
-import { B2BSessionsAuthenticateResponse, B2BClient } from "stytch";
-import loadStytch from "~/utils/loadStytch";
+import { B2BSessionsAuthenticateResponse } from "stytch";
+import { useStytch } from "~/utils/stytch";
 
 export type OrgType = {
   organisationSlug: string;
@@ -23,30 +18,26 @@ const loader = createServerFn()
       throw redirect({ to: "/" });
     }
 
-    const stytchClient = loadStytch();
+    const stytch = useStytch();
 
-    let sessionAuthRes: B2BSessionsAuthenticateResponse;
     try {
       // TODO: Check if we can call authenticateJwt here?
-      sessionAuthRes = await stytchClient.sessions.authenticate({
-        session_duration_minutes: 30, // extend the session a bit
-        session_jwt: session.data.session_jwt,
-      });
+      const { session_jwt, member, organization } =
+        await stytch.sessions.authenticate({
+          session_duration_minutes: 30, // extend the session a bit
+          session_jwt: session.data.session_jwt,
+        });
+
+      await session.update({ session_jwt: session_jwt });
+
+      return {
+        member: member,
+        organization: organization,
+      };
     } catch (err) {
       console.error("Could not find member by session token", err);
       throw redirect({ to: "/" });
     }
-
-    await session.update({
-      intermediate_session_token: undefined,
-      session_jwt: sessionAuthRes.session_jwt,
-      userEmail: sessionAuthRes.member.email_address,
-    });
-
-    return {
-      member: sessionAuthRes.member,
-      organisation: sessionAuthRes.organization,
-    };
   });
 
 export const Route = createFileRoute(
@@ -58,20 +49,19 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const router = useRouter();
   const state = Route.useLoaderData();
   return (
     <div>
       <div>
-        <h1>{state.organisation.organization_name}</h1>
-        <p>{state.organisation.organization_slug}</p>
-        <p>{state.organisation.organization_id}</p>
+        <h1>{state.organization.organization_name}</h1>
+        <p>{state.organization.organization_slug}</p>
+        <p>{state.organization.organization_id}</p>
 
         <h2>{state.member.email_address}</h2>
         <h2>{state.member.name}</h2>
 
         <hr />
-        <Link to="/select-organisation">Select Organisation</Link>
+        <Link to="/discovery/switch-organisation">Switch Organisation</Link>
       </div>
     </div>
   );

@@ -57,7 +57,7 @@ export const formatOAuthStartURL = (
   return `${stytchEnv}v1/b2b/public/oauth/${provider}/start?public_token=${publicToken}&slug=${org_slug}&login_redirect_url=${redirectURL}&signup_redirect_url=${redirectURL}`;
 };
 
-const loadStytch = () => {
+export function useStytch() {
   if (!client) {
     client = new stytch.B2BClient({
       project_id: process.env.STYTCH_PROJECT_ID!,
@@ -67,6 +67,4 @@ const loadStytch = () => {
   }
 
   return client;
-};
-
-export default loadStytch;
+}

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import React from "react";
-import loadStytch from "~/utils/loadStytch";
+import { useStytch } from "~/utils/stytch";
 
 export type LoginData = {
   email: string;
@@ -12,9 +12,9 @@ export const beginMagicLinkDiscovery = createServerFn({ method: "POST" })
   .handler(async (ctx) => {
     console.log("email:", ctx.data.email);
 
-    const stytchClient = loadStytch();
+    const stytch = useStytch();
 
-    await stytchClient.magicLinks.email.discovery.send({
+    await stytch.magicLinks.email.discovery.send({
       email_address: ctx.data.email,
       discovery_redirect_url: "http://localhost:3000/api/authenticate",
     });

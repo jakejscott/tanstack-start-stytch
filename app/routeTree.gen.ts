@@ -11,19 +11,14 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as SelectOrganisationImport } from './routes/select-organisation'
 import { Route as IndexImport } from './routes/index'
 import { Route as DiscoveryIndexImport } from './routes/discovery.index'
+import { Route as DiscoverySwitchOrganisationImport } from './routes/discovery.switch-organisation'
+import { Route as DiscoverySelectOrganisationImport } from './routes/discovery.select-organisation'
 import { Route as DiscoveryOrganisationIdImport } from './routes/discovery.$organisationId'
 import { Route as OrganisationsOrganisationSlugDashboardImport } from './routes/organisations.$organisationSlug.dashboard'
 
 // Create/Update Routes
-
-const SelectOrganisationRoute = SelectOrganisationImport.update({
-  id: '/select-organisation',
-  path: '/select-organisation',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -36,6 +31,20 @@ const DiscoveryIndexRoute = DiscoveryIndexImport.update({
   path: '/discovery/',
   getParentRoute: () => rootRoute,
 } as any)
+
+const DiscoverySwitchOrganisationRoute =
+  DiscoverySwitchOrganisationImport.update({
+    id: '/discovery/switch-organisation',
+    path: '/discovery/switch-organisation',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const DiscoverySelectOrganisationRoute =
+  DiscoverySelectOrganisationImport.update({
+    id: '/discovery/select-organisation',
+    path: '/discovery/select-organisation',
+    getParentRoute: () => rootRoute,
+  } as any)
 
 const DiscoveryOrganisationIdRoute = DiscoveryOrganisationIdImport.update({
   id: '/discovery/$organisationId',
@@ -61,18 +70,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/select-organisation': {
-      id: '/select-organisation'
-      path: '/select-organisation'
-      fullPath: '/select-organisation'
-      preLoaderRoute: typeof SelectOrganisationImport
-      parentRoute: typeof rootRoute
-    }
     '/discovery/$organisationId': {
       id: '/discovery/$organisationId'
       path: '/discovery/$organisationId'
       fullPath: '/discovery/$organisationId'
       preLoaderRoute: typeof DiscoveryOrganisationIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/discovery/select-organisation': {
+      id: '/discovery/select-organisation'
+      path: '/discovery/select-organisation'
+      fullPath: '/discovery/select-organisation'
+      preLoaderRoute: typeof DiscoverySelectOrganisationImport
+      parentRoute: typeof rootRoute
+    }
+    '/discovery/switch-organisation': {
+      id: '/discovery/switch-organisation'
+      path: '/discovery/switch-organisation'
+      fullPath: '/discovery/switch-organisation'
+      preLoaderRoute: typeof DiscoverySwitchOrganisationImport
       parentRoute: typeof rootRoute
     }
     '/discovery/': {
@@ -96,16 +112,18 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/select-organisation': typeof SelectOrganisationRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
+  '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
+  '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
   '/discovery': typeof DiscoveryIndexRoute
   '/organisations/$organisationSlug/dashboard': typeof OrganisationsOrganisationSlugDashboardRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/select-organisation': typeof SelectOrganisationRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
+  '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
+  '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
   '/discovery': typeof DiscoveryIndexRoute
   '/organisations/$organisationSlug/dashboard': typeof OrganisationsOrganisationSlugDashboardRoute
 }
@@ -113,8 +131,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/select-organisation': typeof SelectOrganisationRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
+  '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
+  '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
   '/discovery/': typeof DiscoveryIndexRoute
   '/organisations/$organisationSlug/dashboard': typeof OrganisationsOrganisationSlugDashboardRoute
 }
@@ -123,22 +142,25 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/select-organisation'
     | '/discovery/$organisationId'
+    | '/discovery/select-organisation'
+    | '/discovery/switch-organisation'
     | '/discovery'
     | '/organisations/$organisationSlug/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/select-organisation'
     | '/discovery/$organisationId'
+    | '/discovery/select-organisation'
+    | '/discovery/switch-organisation'
     | '/discovery'
     | '/organisations/$organisationSlug/dashboard'
   id:
     | '__root__'
     | '/'
-    | '/select-organisation'
     | '/discovery/$organisationId'
+    | '/discovery/select-organisation'
+    | '/discovery/switch-organisation'
     | '/discovery/'
     | '/organisations/$organisationSlug/dashboard'
   fileRoutesById: FileRoutesById
@@ -146,16 +168,18 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SelectOrganisationRoute: typeof SelectOrganisationRoute
   DiscoveryOrganisationIdRoute: typeof DiscoveryOrganisationIdRoute
+  DiscoverySelectOrganisationRoute: typeof DiscoverySelectOrganisationRoute
+  DiscoverySwitchOrganisationRoute: typeof DiscoverySwitchOrganisationRoute
   DiscoveryIndexRoute: typeof DiscoveryIndexRoute
   OrganisationsOrganisationSlugDashboardRoute: typeof OrganisationsOrganisationSlugDashboardRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SelectOrganisationRoute: SelectOrganisationRoute,
   DiscoveryOrganisationIdRoute: DiscoveryOrganisationIdRoute,
+  DiscoverySelectOrganisationRoute: DiscoverySelectOrganisationRoute,
+  DiscoverySwitchOrganisationRoute: DiscoverySwitchOrganisationRoute,
   DiscoveryIndexRoute: DiscoveryIndexRoute,
   OrganisationsOrganisationSlugDashboardRoute:
     OrganisationsOrganisationSlugDashboardRoute,
@@ -172,8 +196,9 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/select-organisation",
         "/discovery/$organisationId",
+        "/discovery/select-organisation",
+        "/discovery/switch-organisation",
         "/discovery/",
         "/organisations/$organisationSlug/dashboard"
       ]
@@ -181,11 +206,14 @@ export const routeTree = rootRoute
     "/": {
       "filePath": "index.tsx"
     },
-    "/select-organisation": {
-      "filePath": "select-organisation.tsx"
-    },
     "/discovery/$organisationId": {
       "filePath": "discovery.$organisationId.tsx"
+    },
+    "/discovery/select-organisation": {
+      "filePath": "discovery.select-organisation.tsx"
+    },
+    "/discovery/switch-organisation": {
+      "filePath": "discovery.switch-organisation.tsx"
     },
     "/discovery/": {
       "filePath": "discovery.index.tsx"

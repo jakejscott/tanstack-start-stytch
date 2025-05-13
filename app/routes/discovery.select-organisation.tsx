@@ -7,7 +7,7 @@ import {
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import React from "react";
 import { StytchError } from "stytch";
-import loadStytch, { DiscoveredOrganizations } from "~/utils/loadStytch";
+import { DiscoveredOrganizations, useStytch } from "~/utils/stytch";
 import { useAppSession } from "~/utils/session";
 
 export type CreateOrganisationData = {
@@ -23,16 +23,17 @@ export const createOrganisation = createServerFn({ method: "POST" })
   .validator((data: CreateOrganisationData) => data)
   .handler(async (ctx) => {
     const session = await useAppSession();
+
     if (!session.data.intermediate_session_token) {
-      throw redirect({ to: "/" });
+      throw new Error("No intermediate session");
+      // console.log("No intermediate session, todo logout");
+      // throw redirect({ to: "/" });
     }
 
-    console.log("organisation name:", ctx.data.organisationName);
+    const stytch = useStytch();
 
-    const stytchClient = loadStytch();
-
-    const { member, organization, session_jwt, intermediate_session_token } =
-      await stytchClient.discovery.organizations.create({
+    const { member, organization, session_jwt } =
+      await stytch.discovery.organizations.create({
         intermediate_session_token: session.data.intermediate_session_token,
         email_allowed_domains: [],
         organization_name: ctx.data.organisationName,
@@ -45,7 +46,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
 
     if (organization) {
       try {
-        await stytchClient.organizations.update({
+        await stytch.organizations.update({
           organization_id: organization.organization_id,
           email_jit_provisioning: "RESTRICTED",
           sso_jit_provisioning: "ALL_ALLOWED",
@@ -65,7 +66,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
       }
 
       // Mark the first user in the organization as the admin
-      await stytchClient.organizations.members.update({
+      await stytch.organizations.members.update({
         organization_id: organization.organization_id,
         member_id: member.member_id,
         trusted_metadata: { admin: true },
@@ -76,11 +77,11 @@ export const createOrganisation = createServerFn({ method: "POST" })
         throw new Error("session_jwt was empty, probably needs MFA");
       }
 
-      console.log("setting session");
-
+      await session.clear();
       await session.update({
-        intermediate_session_token: undefined,
         session_jwt: session_jwt,
+        email_address: member.email_address,
+        organisation_id: organization.organization_id,
       });
 
       console.log("sending to dashboard", organization.organization_slug);
@@ -99,18 +100,18 @@ export const createOrganisation = createServerFn({ method: "POST" })
 const loader = createServerFn().handler(async () => {
   const session = await useAppSession();
 
-  if (!session.data.intermediate_session_token && !session.data.session_jwt) {
+  if (!session.data.intermediate_session_token) {
     console.error("No intermediate session token was found");
     throw redirect({ to: "/" });
   }
 
-  const stytchClient = loadStytch();
+  const stytch = useStytch();
 
   try {
     const { discovered_organizations } =
-      await stytchClient.discovery.organizations.list({
+      await stytch.discovery.organizations.list({
         intermediate_session_token: session.data.intermediate_session_token,
-        session_jwt: session.data.session_jwt,
+        session_jwt: undefined,
       });
 
     return {
@@ -118,6 +119,7 @@ const loader = createServerFn().handler(async () => {
       discovered_organizations: discovered_organizations,
     };
   } catch (error) {
+    console.log("Something went wrong here", error);
     throw redirect({ to: "/" });
   }
 });
@@ -168,15 +170,13 @@ const DiscoveredOrganizationsList = ({
   );
 };
 
-export const Route = createFileRoute("/select-organisation")({
+export const Route = createFileRoute("/discovery/select-organisation")({
   component: RouteComponent,
   loader: async () => await loader(),
 });
 
 function RouteComponent() {
-  const router = useRouter();
   const state = Route.useLoaderData();
-
   const createOrganisationMutation = useServerFn(createOrganisation);
 
   const [organisationName, setOrganisationName] = React.useState("");
@@ -185,19 +185,6 @@ function RouteComponent() {
   return (
     <div>
       <h1>Discovery flow Organization selection</h1>
-      <p>
-        Now that you've successfully authenticated, we surface a list of
-        Organizations that you have access to. This list includes Organizations
-        that you've already joined, have been invited to, or are eligible to
-        join through JIT provisioning based on your email domain (as long as
-        there's at least one other active Member in the Organization with the
-        same email domain).
-      </p>
-      <p>
-        Once you select an Organization, we'll exchange the
-        `intermediate_session_token` that was returned during the Discovery flow
-        for a `session_token` specific to the Organization that you select.
-      </p>
 
       {/* <pre>
         {JSON.stringify(
