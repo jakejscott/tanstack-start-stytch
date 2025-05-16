@@ -1,3 +1,2 @@
 - Login with Github
-- Login with Google
 - Logout
