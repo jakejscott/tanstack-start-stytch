@@ -48,16 +48,16 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const state = Route.useLoaderData();
+  const data = Route.useLoaderData();
   return (
     <div>
       <div>
-        <h1>{state.organization.organization_name}</h1>
-        <p>{state.organization.organization_slug}</p>
-        <p>{state.organization.organization_id}</p>
+        <h1>{data.organization.organization_name}</h1>
+        <p>{data.organization.organization_slug}</p>
+        <p>{data.organization.organization_id}</p>
 
-        <h2>{state.member.email_address}</h2>
-        <h2>{state.member.name}</h2>
+        <h2>{data.member.email_address}</h2>
+        <h2>{data.member.name}</h2>
 
         <hr />
         <Link to="/discovery/switch-organisation">Switch Organisation</Link>

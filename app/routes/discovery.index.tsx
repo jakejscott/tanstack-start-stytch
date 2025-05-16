@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { getHeader } from "@tanstack/react-start/server";
 import React from "react";
+import { OAuthButton, OAuthProviders } from "~/components/oauth-button";
 import { useStytch } from "~/utils/stytch";
 
 export type LoginData = {
@@ -14,6 +16,7 @@ export const beginMagicLinkDiscovery = createServerFn({ method: "POST" })
 
     const stytch = useStytch();
 
+    // TODO: The discovery_redirect_url needs to use a base url from config.
     await stytch.magicLinks.email.discovery.send({
       email_address: ctx.data.email,
       discovery_redirect_url: "http://localhost:3000/api/authenticate",
@@ -22,12 +25,25 @@ export const beginMagicLinkDiscovery = createServerFn({ method: "POST" })
     return {};
   });
 
+export const loader = createServerFn().handler(async (ctx) => {
+  const host = getHeader("Host") || "";
+  const proto = getHeader("x-forwarded-proto") || "";
+  const protocol = proto ? "https://" : "http://";
+  const domain = protocol + host;
+
+  return {
+    domain: domain,
+  };
+});
+
 export const Route = createFileRoute("/discovery/")({
   component: RouteComponent,
+  loader: async () => await loader(),
 });
 
 function RouteComponent() {
   const router = useRouter();
+  const data = Route.useLoaderData();
   const [email, setEmail] = React.useState("jake.net@gmail.com");
 
   return (
@@ -65,6 +81,12 @@ function RouteComponent() {
           </button>
         </div>
       </div>
+
+      <OAuthButton
+        providerType={OAuthProviders.Google}
+        hostDomain={data.domain}
+      />
+
       <Link to="/">Home</Link>
     </>
   );

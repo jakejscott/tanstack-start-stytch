@@ -2,7 +2,7 @@ import * as stytch from "stytch";
 
 let client: stytch.B2BClient;
 
-export const publicToken = process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN;
+export const publicToken = process.env.STYTCH_PUBLIC_TOKEN;
 
 export type Member = Awaited<
   ReturnType<typeof client.magicLinks.authenticate>
@@ -35,7 +35,7 @@ export const formatSSOStartURL = (
   redirectDomain: string,
   connection_id: string
 ): string => {
-  const redirectURL = redirectDomain + "/api/callback";
+  const redirectURL = redirectDomain + "/api/authenticate";
   return `${stytchEnv}v1/public/sso/start?connection_id=${connection_id}&public_token=${publicToken}&login_redirect_url=${redirectURL}&signup_redirect_url=${redirectURL}`;
 };
 
@@ -44,7 +44,7 @@ export const formatOAuthDiscoveryStartURL = (
   redirectDomain: string,
   provider: string
 ): string => {
-  const redirectURL = redirectDomain + "/api/callback";
+  const redirectURL = redirectDomain + "/api/authenticate";
   return `${stytchEnv}v1/b2b/public/oauth/${provider}/discovery/start?public_token=${publicToken}&discovery_redirect_url=${redirectURL}`;
 };
 
@@ -53,7 +53,7 @@ export const formatOAuthStartURL = (
   provider: string,
   org_slug: string
 ): string => {
-  const redirectURL = redirectDomain + "/api/callback";
+  const redirectURL = redirectDomain + "/api/authenticate";
   return `${stytchEnv}v1/b2b/public/oauth/${provider}/start?public_token=${publicToken}&slug=${org_slug}&login_redirect_url=${redirectURL}&signup_redirect_url=${redirectURL}`;
 };
 

@@ -12,7 +12,41 @@ export const APIRoute = createAPIFileRoute("/api/authenticate")({
 
     console.log({ stytch_redirect_type, stytch_token_type });
 
-    if (stytch_token_type === "discovery" && token) {
+    // http://localhost:3000/api/authenticate?stytch_token_type=discovery_oauth&token=AqaZp5x2ZqZ29gcSr1wdOeVbN-VoypFaHA4jNW2L_z_J
+    if (stytch_token_type == "discovery_oauth" && token) {
+      //
+      const stytch = useStytch();
+
+      try {
+        const { intermediate_session_token, email_address } =
+          await stytch.oauth.discovery.authenticate({
+            discovery_oauth_token: token,
+          });
+
+        const session = await useAppSession();
+
+        await session.update({
+          intermediate_session_token: intermediate_session_token,
+          email_address: email_address,
+        });
+
+        return new Response("success", {
+          status: 307,
+          headers: {
+            location: "/discovery/select-organisation",
+          },
+        });
+      } catch (error) {
+        console.log("discovery oauth authenticate failed");
+
+        return new Response("failed", {
+          status: 307,
+          headers: {
+            location: "/",
+          },
+        });
+      }
+    } else if (stytch_token_type === "discovery" && token) {
       const stytch = useStytch();
 
       try {
