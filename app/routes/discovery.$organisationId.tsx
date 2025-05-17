@@ -21,6 +21,9 @@ const loader = createServerFn()
         await stytch.sessions.exchange({
           organization_id: data.organisationId,
           session_jwt: session.data.session_jwt,
+          session_duration_minutes: parseInt(
+            process.env.SESSION_DURATION_MINUTES!
+          ),
         });
 
       if (!session_jwt) {
@@ -51,7 +54,9 @@ const loader = createServerFn()
         await stytch.discovery.intermediateSessions.exchange({
           intermediate_session_token: session.data.intermediate_session_token,
           organization_id: data.organisationId,
-          session_duration_minutes: 60,
+          session_duration_minutes: parseInt(
+            process.env.SESSION_DURATION_MINUTES!
+          ),
         });
 
       if (!session_jwt) {

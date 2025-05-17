@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { MemberSession } from "stytch";
 import { useAppSession } from "~/utils/session";
 import { useStytch } from "~/utils/stytch";
 
@@ -19,25 +20,43 @@ const loader = createServerFn()
 
     const stytch = useStytch();
 
+    let member_session: MemberSession | null = null;
+
     try {
-      const { session_jwt, member_session } =
-        await stytch.sessions.authenticateJwt({
+      member_session = await stytch.sessions.authenticateJwtLocal({
+        session_jwt: session.data.session_jwt,
+        max_token_age_seconds: parseInt(process.env.MAX_TOKEN_AGE_SECONDS!),
+      });
+    } catch (err) {
+      //
+      console.log("JWT token local validation expired");
+    }
+
+    if (!member_session) {
+      try {
+        const authResult = await stytch.sessions.authenticate({
           session_jwt: session.data.session_jwt,
+          session_duration_minutes: parseInt(
+            process.env.SESSION_DURATION_MINUTES!
+          ),
         });
 
-      await session.update({
-        session_jwt: session_jwt,
-      });
+        member_session = authResult.member_session;
 
-      return {
-        organization_id: member_session.organization_id,
-        organisation_slug: data.organisationSlug,
-        member_session: member_session,
-      };
-    } catch (err) {
-      console.error("Could not find member by session token", err);
-      throw redirect({ to: "/" });
+        await session.update({
+          session_jwt: authResult.session_jwt,
+        });
+      } catch (err) {
+        console.error("Could not find member by session token", err);
+        throw redirect({ to: "/" });
+      }
     }
+
+    return {
+      organization_id: member_session.organization_id,
+      organisation_slug: data.organisationSlug,
+      member_session: member_session,
+    };
   });
 
 export const Route = createFileRoute(
