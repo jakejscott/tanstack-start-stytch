@@ -3,11 +3,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getHeader } from "@tanstack/react-start/server";
 import { OAuthButton, OAuthProviders } from "~/components/oauth-button";
-import {
-  formatOAuthDiscoveryStartURL,
-  formatOAuthStartURL,
-  useStytch,
-} from "~/utils/stytch";
+import { formatOAuthDiscoveryStartURL, useStytch } from "~/utils/stytch";
 
 export type LoginData = {
   email: string;

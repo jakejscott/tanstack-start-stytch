@@ -4,7 +4,6 @@ import { useAppSession } from "~/utils/session";
 
 export const APIRoute = createAPIFileRoute("/api/authenticate")({
   GET: async ({ request, params }) => {
-    // http://localhost:3000/api/authenticate?stytch_redirect_type=login&stytch_token_type=discovery&token=VVgffoAqcuHo7cN7QWKkdeslVVkOM5Qjs_7O4Z11oC1z
     const url = new URL(request.url);
     const stytch_redirect_type = url.searchParams.get("stytch_redirect_type");
     const stytch_token_type = url.searchParams.get("stytch_token_type");
@@ -12,7 +11,6 @@ export const APIRoute = createAPIFileRoute("/api/authenticate")({
 
     console.log({ stytch_redirect_type, stytch_token_type });
 
-    // http://localhost:3000/api/authenticate?stytch_token_type=discovery_oauth&token=AqaZp5x2ZqZ29gcSr1wdOeVbN-VoypFaHA4jNW2L_z_J
     if (stytch_token_type == "discovery_oauth" && token) {
       //
       const stytch = useStytch();
