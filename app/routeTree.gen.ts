@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as LogoutImport } from './routes/logout'
 import { Route as IndexImport } from './routes/index'
 import { Route as DiscoveryIndexImport } from './routes/discovery.index'
 import { Route as DiscoverySwitchOrganisationImport } from './routes/discovery.switch-organisation'
@@ -19,6 +20,12 @@ import { Route as DiscoveryOrganisationIdImport } from './routes/discovery.$orga
 import { Route as OrganisationsOrganisationSlugDashboardImport } from './routes/organisations.$organisationSlug.dashboard'
 
 // Create/Update Routes
+
+const LogoutRoute = LogoutImport.update({
+  id: '/logout',
+  path: '/logout',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -70,6 +77,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutImport
+      parentRoute: typeof rootRoute
+    }
     '/discovery/$organisationId': {
       id: '/discovery/$organisationId'
       path: '/discovery/$organisationId'
@@ -112,6 +126,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/logout': typeof LogoutRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
@@ -121,6 +136,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/logout': typeof LogoutRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
@@ -131,6 +147,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/logout': typeof LogoutRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
@@ -142,6 +159,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/logout'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
@@ -150,6 +168,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/logout'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
@@ -158,6 +177,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/logout'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
@@ -168,6 +188,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LogoutRoute: typeof LogoutRoute
   DiscoveryOrganisationIdRoute: typeof DiscoveryOrganisationIdRoute
   DiscoverySelectOrganisationRoute: typeof DiscoverySelectOrganisationRoute
   DiscoverySwitchOrganisationRoute: typeof DiscoverySwitchOrganisationRoute
@@ -177,6 +198,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LogoutRoute: LogoutRoute,
   DiscoveryOrganisationIdRoute: DiscoveryOrganisationIdRoute,
   DiscoverySelectOrganisationRoute: DiscoverySelectOrganisationRoute,
   DiscoverySwitchOrganisationRoute: DiscoverySwitchOrganisationRoute,
@@ -196,6 +218,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/logout",
         "/discovery/$organisationId",
         "/discovery/select-organisation",
         "/discovery/switch-organisation",
@@ -205,6 +228,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/logout": {
+      "filePath": "logout.tsx"
     },
     "/discovery/$organisationId": {
       "filePath": "discovery.$organisationId.tsx"

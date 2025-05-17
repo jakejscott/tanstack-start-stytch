@@ -1,2 +1,1 @@
 - Login with Github
-- Logout

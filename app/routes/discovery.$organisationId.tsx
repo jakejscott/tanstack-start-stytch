@@ -76,7 +76,7 @@ const loader = createServerFn()
     }
 
     console.log("no session tokens, todo redirect to logout");
-    throw redirect({ to: "/", statusCode: 307 });
+    throw redirect({ to: "/" });
   });
 
 export const Route = createFileRoute("/discovery/$organisationId")({

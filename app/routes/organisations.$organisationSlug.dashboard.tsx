@@ -30,8 +30,9 @@ const loader = createServerFn()
       });
 
       return {
-        member_id: member_session.member_id,
         organization_id: member_session.organization_id,
+        organisation_slug: data.organisationSlug,
+        member_session: member_session,
       };
     } catch (err) {
       console.error("Could not find member by session token", err);
@@ -52,10 +53,16 @@ function RouteComponent() {
   return (
     <div>
       <div>
-        <h1>{data.member_id}</h1>
+        <p>{data.organisation_slug}</p>
         <p>{data.organization_id}</p>
+        <pre>{JSON.stringify(data.member_session, null, 2)}</pre>
         <hr />
-        <Link to="/discovery/switch-organisation">Switch Organisation</Link>
+        <p>
+          <Link to="/discovery/switch-organisation">Switch Organisation</Link>
+        </p>
+        <p>
+          <Link to="/logout">Logout</Link>
+        </p>
       </div>
     </div>
   );
