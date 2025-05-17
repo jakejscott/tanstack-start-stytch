@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getHeader } from "@tanstack/react-start/server";
-import React from "react";
 import { OAuthButton, OAuthProviders } from "~/components/oauth-button";
-import { useStytch } from "~/utils/stytch";
+import {
+  formatOAuthDiscoveryStartURL,
+  formatOAuthStartURL,
+  useStytch,
+} from "~/utils/stytch";
 
 export type LoginData = {
   email: string;
@@ -26,13 +30,19 @@ export const beginMagicLinkDiscovery = createServerFn({ method: "POST" })
   });
 
 export const loader = createServerFn().handler(async (ctx) => {
+  console.log("loader called on discovery");
   const host = getHeader("Host") || "";
   const proto = getHeader("x-forwarded-proto") || "";
   const protocol = proto ? "https://" : "http://";
   const domain = protocol + host;
 
+  const googleOAuthDiscoveryStartUrl = formatOAuthDiscoveryStartURL(
+    domain,
+    "google"
+  );
+
   return {
-    domain: domain,
+    googleOAuthDiscoveryStartUrl: googleOAuthDiscoveryStartUrl,
   };
 });
 
@@ -44,7 +54,7 @@ export const Route = createFileRoute("/discovery/")({
 function RouteComponent() {
   const router = useRouter();
   const data = Route.useLoaderData();
-  const [email, setEmail] = React.useState("jake.net@gmail.com");
+  const [email, setEmail] = useState("jake.net@gmail.com");
 
   return (
     <>
@@ -84,7 +94,7 @@ function RouteComponent() {
 
       <OAuthButton
         providerType={OAuthProviders.Google}
-        hostDomain={data.domain}
+        oAuthStartUrl={data.googleOAuthDiscoveryStartUrl}
       />
 
       <Link to="/">Home</Link>

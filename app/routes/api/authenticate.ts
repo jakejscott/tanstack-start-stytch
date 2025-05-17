@@ -23,11 +23,18 @@ export const APIRoute = createAPIFileRoute("/api/authenticate")({
             discovery_oauth_token: token,
           });
 
+        console.log(
+          "logged in with oauth",
+          intermediate_session_token,
+          email_address
+        );
+
         const session = await useAppSession();
 
         await session.update({
           intermediate_session_token: intermediate_session_token,
           email_address: email_address,
+          session_jwt: undefined,
         });
 
         return new Response("success", {
@@ -60,6 +67,7 @@ export const APIRoute = createAPIFileRoute("/api/authenticate")({
         await session.update({
           intermediate_session_token: intermediate_session_token,
           email_address: email_address,
+          session_jwt: undefined,
         });
 
         return new Response("success", {

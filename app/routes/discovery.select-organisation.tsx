@@ -1,14 +1,9 @@
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
-import React from "react";
 import { StytchError } from "stytch";
 import { DiscoveredOrganizations, useStytch } from "~/utils/stytch";
 import { useAppSession } from "~/utils/session";
+import { useState } from "react";
 
 export type CreateOrganisationData = {
   organisationName: string;
@@ -179,21 +174,12 @@ function RouteComponent() {
   const state = Route.useLoaderData();
   const createOrganisationMutation = useServerFn(createOrganisation);
 
-  const [organisationName, setOrganisationName] = React.useState("");
-  const [organisationSlug, setOrganisationSlug] = React.useState("");
+  const [organisationName, setOrganisationName] = useState("");
+  const [organisationSlug, setOrganisationSlug] = useState("");
 
   return (
     <div>
       <h1>Discovery flow Organization selection</h1>
-
-      {/* <pre>
-        {JSON.stringify(
-          { discovered_organizations: state.discovered_organizations },
-          null,
-          2
-        )}
-      </pre> */}
-
       <DiscoveredOrganizationsList
         discovered_organizations={state.discovered_organizations}
       />
