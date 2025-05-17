@@ -1,7 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useAppSession } from "~/utils/session";
-import { B2BSessionsAuthenticateResponse } from "stytch";
 import { useStytch } from "~/utils/stytch";
 
 export type OrgType = {
@@ -21,17 +20,18 @@ const loader = createServerFn()
     const stytch = useStytch();
 
     try {
-      const { session_jwt, member, organization } =
-        await stytch.sessions.authenticate({
-          session_duration_minutes: 30, // extend the session a bit
+      const { session_jwt, member_session } =
+        await stytch.sessions.authenticateJwt({
           session_jwt: session.data.session_jwt,
         });
 
-      await session.update({ session_jwt: session_jwt });
+      await session.update({
+        session_jwt: session_jwt,
+      });
 
       return {
-        member: member,
-        organization: organization,
+        member_id: member_session.member_id,
+        organization_id: member_session.organization_id,
       };
     } catch (err) {
       console.error("Could not find member by session token", err);
@@ -52,13 +52,8 @@ function RouteComponent() {
   return (
     <div>
       <div>
-        <h1>{data.organization.organization_name}</h1>
-        <p>{data.organization.organization_slug}</p>
-        <p>{data.organization.organization_id}</p>
-
-        <h2>{data.member.email_address}</h2>
-        <h2>{data.member.name}</h2>
-
+        <h1>{data.member_id}</h1>
+        <p>{data.organization_id}</p>
         <hr />
         <Link to="/discovery/switch-organisation">Switch Organisation</Link>
       </div>
