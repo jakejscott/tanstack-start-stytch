@@ -5,10 +5,10 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import appCss from "~/styles/app.css?url";
-import { seo } from "~/utils/seo";
-import { DefaultCatchBoundary } from "~/components/default-catch-boundary";
-import { NotFound } from "~/components/not-found";
+import appCss from "@/styles/app.css?url";
+import { seo } from "@/lib/seo";
+import { DefaultCatchBoundary } from "@/components/default-catch-boundary";
+import { NotFound } from "@/components/not-found";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -21,8 +21,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       ...seo({
-        title:
-          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
+        title: "TanStack Start Starter",
         description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
       }),
     ],

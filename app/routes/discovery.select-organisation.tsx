@@ -1,8 +1,8 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { StytchError } from "stytch";
-import { DiscoveredOrganizations, useStytch } from "~/utils/stytch";
-import { useAppSession } from "~/utils/session";
+import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
+import { useAppSession } from "@/lib/session";
 import { useState } from "react";
 
 export type CreateOrganisationData = {

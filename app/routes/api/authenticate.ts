@@ -1,6 +1,6 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import { useStytch } from "~/utils/stytch";
-import { useAppSession } from "~/utils/session";
+import { useStytch } from "@/lib/stytch";
+import { useAppSession } from "@/lib/session";
 
 export const APIRoute = createAPIFileRoute("/api/authenticate")({
   GET: async ({ request, params }) => {

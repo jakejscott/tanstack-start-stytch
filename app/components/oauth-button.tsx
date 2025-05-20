@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { GoogleIconSvg } from "~/icons/google";
+import { GoogleIconSvg } from "@/icons/google";
 
 export enum OAuthProviders {
   Google = "google",

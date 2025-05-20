@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { useAppSession } from "~/utils/session";
-import { useStytch } from "~/utils/stytch";
+import { useAppSession } from "@/lib/session";
+import { useStytch } from "@/lib/stytch";
 
 const loader = createServerFn().handler(async () => {
   const session = await useAppSession();
