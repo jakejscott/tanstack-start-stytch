@@ -1,24 +1,16 @@
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useStytch } from "@/lib/stytch";
+import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
-import { useStytch } from "@/lib/stytch";
-import React from "react";
 import { Loader2 } from "lucide-react";
-
-export type LoginFormProps = {
-  googleOAuthDiscoveryStartUrl: string;
-};
-
-export type BeginMagicLinkDiscoveryData = {
-  email: string;
-};
+import React from "react";
 
 export const loginFn = createServerFn({ method: "POST" })
-  .validator((data: BeginMagicLinkDiscoveryData) => data)
+  .validator((data: { email: string }) => data)
   .handler(async (ctx) => {
     const stytch = useStytch();
     await stytch.magicLinks.email.discovery.send({
@@ -28,7 +20,7 @@ export const loginFn = createServerFn({ method: "POST" })
     return {};
   });
 
-export function LoginForm(props: LoginFormProps) {
+export function LoginForm(props: { googleOAuthDiscoveryStartUrl: string }) {
   const [email, setEmail] = React.useState("");
   const [status, setStatus] = React.useState<"idle" | "pending" | "success" | "error">("idle");
 
@@ -49,7 +41,7 @@ export function LoginForm(props: LoginFormProps) {
     return (
       <div>
         <h1>Check your email</h1>
-        <p>We emailed a magic link to {email}. Click the link to continue</p>
+        <p>We emailed a magic link to {email}. Click the link to continue.</p>
         <p>
           Need help? <a href="#">Contact support</a>
         </p>
