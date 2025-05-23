@@ -39,12 +39,23 @@ export function LoginForm(props: { googleOAuthDiscoveryStartUrl: string }) {
 
   if (status == "success") {
     return (
-      <div>
-        <h1>Check your email</h1>
-        <p>We emailed a magic link to {email}. Click the link to continue.</p>
-        <p>
-          Need help? <a href="#">Contact support</a>
-        </p>
+      <div className={cn("flex flex-col gap-6")}>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Check your email</CardTitle>
+            <CardDescription>We emailed a magic link to {email}. Click the link to continue.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div>
+              <div className="text-center text-sm">
+                Need help?{" "}
+                <a href="#" className="underline underline-offset-4">
+                  Contact support
+                </a>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

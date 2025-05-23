@@ -1,10 +1,5 @@
 import { ReactNode } from "react";
-import {
-  createRootRoute,
-  HeadContent,
-  Outlet,
-  Scripts,
-} from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import appCss from "@/styles/app.css?url";
 import { seo } from "@/lib/seo";
 import { DefaultCatchBoundary } from "@/components/default-catch-boundary";
@@ -21,8 +16,8 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       ...seo({
-        title: "TanStack Start Starter",
-        description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+        title: "Acme",
+        description: `Acme`,
       }),
     ],
     links: [
@@ -69,7 +64,7 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html>
+    <html className="dark">
       <head>
         <HeadContent />
       </head>
