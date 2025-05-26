@@ -182,8 +182,18 @@ function RouteComponent() {
         <div className={cn("flex flex-col gap-6")}>
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-xl">Select Organization</CardTitle>
-              <CardDescription>Choose an organization to continue, or create a new one</CardDescription>
+              <CardTitle className="text-xl">
+                {state.discovered_organizations.length == 0 && <>Create Organization</>}
+                {state.discovered_organizations.length > 0 && <>Select Organization</>}
+              </CardTitle>
+              <CardDescription>
+                {state.discovered_organizations.length == 0 && (
+                  <>Let's get started by creating your first organization.</>
+                )}
+                {state.discovered_organizations.length > 0 && (
+                  <>Choose an organization to continue, or create a new one</>
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6">
@@ -218,14 +228,16 @@ function RouteComponent() {
                   </div>
                 )}
 
-                <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                  <span className="bg-card text-muted-foreground relative z-10 px-2">Or create new organisation</span>
-                </div>
+                {state.discovered_organizations.length > 0 && (
+                  <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                    <span className="bg-card text-muted-foreground relative z-10 px-2">Or create new organization</span>
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-6">
                     <div className="grid gap-3">
-                      <Label htmlFor="organisationName">Organisation Name</Label>
+                      <Label htmlFor="organisationName">Organization Name</Label>
                       <Input
                         id="organisationName"
                         type="text"
@@ -237,7 +249,11 @@ function RouteComponent() {
                           setOrganisationName(e.target.value);
                         }}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        You can always change this later in your organization settings.
+                      </p>
                     </div>
+
                     <Button type="submit" className="w-full">
                       {status === "pending" && <Loader2 className="animate-spin" />}
                       Create Organisation
