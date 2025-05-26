@@ -1,13 +1,18 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAppSession } from "@/lib/session";
+import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
+import { cn } from "@/lib/utils";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
-import { StytchError } from "stytch";
-import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
-import { useAppSession } from "@/lib/session";
+import { Building2, GalleryVerticalEnd, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { StytchError } from "stytch";
 
 export type CreateOrganisationData = {
   organisationName: string;
-  organisationSlug: string;
 };
 
 function toDomain(email: string): string {
@@ -21,8 +26,6 @@ export const createOrganisation = createServerFn({ method: "POST" })
 
     if (!session.data.intermediate_session_token) {
       throw new Error("No intermediate session");
-      // console.log("No intermediate session, todo logout");
-      // throw redirect({ to: "/" });
     }
 
     const stytch = useStytch();
@@ -66,17 +69,8 @@ export const createOrganisation = createServerFn({ method: "POST" })
       });
 
       if (session_jwt === "") {
-        // Use the intermediate_session_token here...
         console.log("session_jwt was empty, but intermediate_session_token was not");
         throw new Error("session_jwt was empty, probably needs MFA");
-
-        // TODO: Implement this... we need to implement email OTP for Github here. Not sure why
-        // setIntermediateSession(req, res, intermediate_session_token);
-        // clearSession(req, res);
-        // return res.redirect(
-        //   302,
-        //   `/${organization.organization_slug}/smsmfa?sent=false&org_id=${organization.organization_id}&member_id=${member.member_id}`
-        // );
       }
 
       await session.clear();
@@ -85,8 +79,6 @@ export const createOrganisation = createServerFn({ method: "POST" })
         email_address: member.email_address,
         organisation_id: organization.organization_id,
       });
-
-      console.log("sending to dashboard", organization.organization_slug);
 
       throw redirect({
         to: "/organisations/$organisationSlug/dashboard",
@@ -101,7 +93,6 @@ export const createOrganisation = createServerFn({ method: "POST" })
 
 const loader = createServerFn().handler(async () => {
   const session = await useAppSession();
-
   if (!session.data.intermediate_session_token) {
     console.error("No intermediate session token was found");
     throw redirect({ to: "/" });
@@ -125,45 +116,6 @@ const loader = createServerFn().handler(async () => {
   }
 });
 
-type DiscoveredOrganizationsListProps = {
-  discovered_organizations: DiscoveredOrganizations;
-};
-
-const DiscoveredOrganizationsList = ({ discovered_organizations }: DiscoveredOrganizationsListProps) => {
-  const formatMembership = ({
-    membership,
-    organization,
-  }: Pick<DiscoveredOrganizations[0], "membership" | "organization">) => {
-    if (membership?.type === "pending_member") {
-      return `Join ${organization?.organization_name}`;
-    }
-    if (membership?.type === "eligible_to_join_by_email_domain") {
-      return `Join ${organization?.organization_name}`;
-    }
-    if (membership?.type === "invited_member") {
-      return `Accept invitation to ${organization?.organization_name}`;
-    }
-    return `Log into ${organization?.organization_name}`;
-  };
-
-  return (
-    <div className="section">
-      <h2>Select an Organization</h2>
-      <p>Select the Organization that you&apos;d like to log into.</p>
-      {discovered_organizations.length === 0 && <p>No existing organizations.</p>}
-      <ul>
-        {discovered_organizations.map(({ organization, membership }) => (
-          <li key={organization!.organization_id}>
-            <Link to={"/discovery/$organisationId"} params={{ organisationId: organization!.organization_id }}>
-              <span>{formatMembership({ organization, membership })}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
 export const Route = createFileRoute("/discovery/select-organisation")({
   component: RouteComponent,
   loader: async () => await loader(),
@@ -171,57 +123,130 @@ export const Route = createFileRoute("/discovery/select-organisation")({
 
 function RouteComponent() {
   const state = Route.useLoaderData();
-  const createOrganisationMutation = useServerFn(createOrganisation);
 
   const [organisationName, setOrganisationName] = useState("");
-  const [organisationSlug, setOrganisationSlug] = useState("");
+  const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
+
+  const _createOrganisation = useServerFn(createOrganisation);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("pending");
+    try {
+      await _createOrganisation({ data: { organisationName: organisationName } });
+      setStatus("success");
+    } catch (error) {
+      setStatus("error");
+    }
+  };
+
+  // const formatMembership = ({
+  //   membership,
+  //   organization,
+  // }: Pick<DiscoveredOrganizations[0], "membership" | "organization">) => {
+  //   if (membership?.type === "pending_member") {
+  //     return `Join ${organization?.organization_name}`;
+  //   }
+  //   if (membership?.type === "eligible_to_join_by_email_domain") {
+  //     return `Join ${organization?.organization_name}`;
+  //   }
+  //   if (membership?.type === "invited_member") {
+  //     return `Accept invitation to ${organization?.organization_name}`;
+  //   }
+  //   return `Log into ${organization?.organization_name}`;
+  // };
+
+  const formatAction = ({ membership }: Pick<DiscoveredOrganizations[0], "membership">) => {
+    if (membership?.type === "pending_member") {
+      return `Join`;
+    }
+    if (membership?.type === "eligible_to_join_by_email_domain") {
+      return `Join`;
+    }
+    if (membership?.type === "invited_member") {
+      return `Accept invitation`;
+    }
+    return `Select`;
+  };
 
   return (
-    <div>
-      <h1>Discovery flow Organization selection</h1>
-      <DiscoveredOrganizationsList discovered_organizations={state.discovered_organizations} />
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+      <div className="flex w-full max-w-lg flex-col gap-6">
+        <a href="#" className="flex items-center gap-2 self-center font-medium">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <GalleryVerticalEnd className="size-4" />
+          </div>
+          Acme Inc.
+        </a>
 
-      <div>
-        <div>
-          <label htmlFor="organisationName">Organisation name</label>
-        </div>
-        <div>
-          <input
-            type="organisationName"
-            name="organisationName"
-            value={organisationName}
-            onChange={(e) => {
-              setOrganisationName(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="organisationSlug">Organisation slug</label>
-        </div>
-        <div>
-          <input
-            type="organisationSlug"
-            name="organisationSlug"
-            value={organisationSlug}
-            onChange={(e) => {
-              setOrganisationSlug(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <button
-            type="submit"
-            onClick={() => {
-              createOrganisationMutation({
-                data: {
-                  organisationName: organisationName,
-                  organisationSlug: organisationSlug,
-                },
-              });
-            }}
-          >
-            Continue
-          </button>
+        <div className={cn("flex flex-col gap-6")}>
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl">Select Organization</CardTitle>
+              <CardDescription>Choose an organization to continue, or create a new one</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6">
+                {state.discovered_organizations.length > 0 && (
+                  <div className="space-y-2">
+                    {state.discovered_organizations.map(({ organization, membership }) => (
+                      <Link
+                        to={"/discovery/$organisationId"}
+                        params={{ organisationId: organization!.organization_id }}
+                        key={organization!.organization_id}
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Building2 className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{organization?.organization_name}</p>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span className="capitalize">
+                                {membership!.member!.roles.map((x) => x.role_id).join(", ")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button variant="ghost" size="sm" className="cursor-pointer">
+                          {formatAction({ membership: membership })}
+                        </Button>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                  <span className="bg-card text-muted-foreground relative z-10 px-2">Or create new organisation</span>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                  <div className="grid gap-6">
+                    <div className="grid gap-3">
+                      <Label htmlFor="organisationName">Organisation Name</Label>
+                      <Input
+                        id="organisationName"
+                        type="text"
+                        placeholder=""
+                        required
+                        value={organisationName}
+                        disabled={status === "pending"}
+                        onChange={(e) => {
+                          setOrganisationName(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full">
+                      {status === "pending" && <Loader2 className="animate-spin" />}
+                      Create Organisation
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

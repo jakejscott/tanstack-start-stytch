@@ -1,8 +1,8 @@
+import { LoginForm } from "@/components/login-form";
+import { formatOAuthDiscoveryStartURL } from "@/lib/stytch";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getHeader } from "@tanstack/react-start/server";
-import { formatOAuthDiscoveryStartURL } from "@/lib/stytch";
-import { LoginForm } from "@/components/login-form";
 import { GalleryVerticalEnd } from "lucide-react";
 
 export const loader = createServerFn().handler(async (ctx) => {
