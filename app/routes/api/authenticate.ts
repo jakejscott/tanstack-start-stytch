@@ -14,7 +14,6 @@ export const APIRoute = createAPIFileRoute("/api/authenticate")({
     if (stytch_token_type == "discovery_oauth" && token) {
       //
       const stytch = useStytch();
-
       try {
         const { intermediate_session_token, email_address } =
           await stytch.oauth.discovery.authenticate({

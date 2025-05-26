@@ -15,16 +15,17 @@ const loader = createServerFn()
     const stytch = useStytch();
 
     if (session.data.session_jwt) {
-      console.log("switching orgs using session_jwt");
+      console.log("switching orgs using session_jwt", session.data);
 
-      const { session_jwt, organization, member } =
-        await stytch.sessions.exchange({
-          organization_id: data.organisationId,
-          session_jwt: session.data.session_jwt,
-          session_duration_minutes: parseInt(
-            process.env.SESSION_DURATION_MINUTES!
-          ),
-        });
+      const exchangeSessionResult = await stytch.sessions.exchange({
+        organization_id: data.organisationId,
+        session_jwt: session.data.session_jwt,
+        session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
+      });
+
+      console.log("Session exchange result", exchangeSessionResult);
+
+      const { session_jwt, organization, member } = exchangeSessionResult;
 
       if (!session_jwt) {
         // TODO: handle MFA
@@ -50,14 +51,11 @@ const loader = createServerFn()
     if (session.data.intermediate_session_token) {
       console.log("switching orgs using intermediate_session_token");
 
-      const { session_jwt, organization, member } =
-        await stytch.discovery.intermediateSessions.exchange({
-          intermediate_session_token: session.data.intermediate_session_token,
-          organization_id: data.organisationId,
-          session_duration_minutes: parseInt(
-            process.env.SESSION_DURATION_MINUTES!
-          ),
-        });
+      const { session_jwt, organization, member } = await stytch.discovery.intermediateSessions.exchange({
+        intermediate_session_token: session.data.intermediate_session_token,
+        organization_id: data.organisationId,
+        session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
+      });
 
       if (!session_jwt) {
         // TODO: handle MFA
@@ -85,6 +83,5 @@ const loader = createServerFn()
   });
 
 export const Route = createFileRoute("/discovery/$organisationId")({
-  loader: async ({ params: { organisationId } }) =>
-    await loader({ data: { organisationId } }),
+  loader: async ({ params: { organisationId } }) => await loader({ data: { organisationId } }),
 });

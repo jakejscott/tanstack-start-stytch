@@ -27,17 +27,18 @@ export const createOrganisation = createServerFn({ method: "POST" })
 
     const stytch = useStytch();
 
-    const { member, organization, session_jwt } =
-      await stytch.discovery.organizations.create({
-        intermediate_session_token: session.data.intermediate_session_token,
-        email_allowed_domains: [],
-        organization_name: ctx.data.organisationName,
-        organization_slug: ctx.data.organisationName,
-        session_duration_minutes: parseInt(
-          process.env.SESSION_DURATION_MINUTES!
-        ),
-        mfa_policy: "OPTIONAL",
-      });
+    const createResult = await stytch.discovery.organizations.create({
+      intermediate_session_token: session.data.intermediate_session_token,
+      email_allowed_domains: [],
+      organization_name: ctx.data.organisationName,
+      organization_slug: ctx.data.organisationName,
+      session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
+      mfa_policy: "OPTIONAL",
+    });
+
+    console.log("org create result", createResult);
+
+    const { member, organization, session_jwt, intermediate_session_token, member_authenticated } = createResult;
 
     // Make the organization discoverable to other emails
 
@@ -50,13 +51,8 @@ export const createOrganisation = createServerFn({ method: "POST" })
           email_allowed_domains: [toDomain(member.email_address)],
         });
       } catch (e) {
-        if (
-          e instanceof StytchError &&
-          e.error_type == "organization_settings_domain_too_common"
-        ) {
-          console.log(
-            "User domain is common email provider, cannot link to organization"
-          );
+        if (e instanceof StytchError && e.error_type == "organization_settings_domain_too_common") {
+          console.log("User domain is common email provider, cannot link to organization");
         } else {
           throw e;
         }
@@ -70,8 +66,17 @@ export const createOrganisation = createServerFn({ method: "POST" })
       });
 
       if (session_jwt === "") {
-        console.log("session_jwt was empty");
+        // Use the intermediate_session_token here...
+        console.log("session_jwt was empty, but intermediate_session_token was not");
         throw new Error("session_jwt was empty, probably needs MFA");
+
+        // TODO: Implement this... we need to implement email OTP for Github here. Not sure why
+        // setIntermediateSession(req, res, intermediate_session_token);
+        // clearSession(req, res);
+        // return res.redirect(
+        //   302,
+        //   `/${organization.organization_slug}/smsmfa?sent=false&org_id=${organization.organization_id}&member_id=${member.member_id}`
+        // );
       }
 
       await session.clear();
@@ -105,11 +110,10 @@ const loader = createServerFn().handler(async () => {
   const stytch = useStytch();
 
   try {
-    const { discovered_organizations } =
-      await stytch.discovery.organizations.list({
-        intermediate_session_token: session.data.intermediate_session_token,
-        session_jwt: undefined,
-      });
+    const { discovered_organizations } = await stytch.discovery.organizations.list({
+      intermediate_session_token: session.data.intermediate_session_token,
+      session_jwt: undefined,
+    });
 
     return {
       intermediate_session: session.data.intermediate_session_token,
@@ -125,9 +129,7 @@ type DiscoveredOrganizationsListProps = {
   discovered_organizations: DiscoveredOrganizations;
 };
 
-const DiscoveredOrganizationsList = ({
-  discovered_organizations,
-}: DiscoveredOrganizationsListProps) => {
+const DiscoveredOrganizationsList = ({ discovered_organizations }: DiscoveredOrganizationsListProps) => {
   const formatMembership = ({
     membership,
     organization,
@@ -148,16 +150,11 @@ const DiscoveredOrganizationsList = ({
     <div className="section">
       <h2>Select an Organization</h2>
       <p>Select the Organization that you&apos;d like to log into.</p>
-      {discovered_organizations.length === 0 && (
-        <p>No existing organizations.</p>
-      )}
+      {discovered_organizations.length === 0 && <p>No existing organizations.</p>}
       <ul>
         {discovered_organizations.map(({ organization, membership }) => (
           <li key={organization!.organization_id}>
-            <Link
-              to={"/discovery/$organisationId"}
-              params={{ organisationId: organization!.organization_id }}
-            >
+            <Link to={"/discovery/$organisationId"} params={{ organisationId: organization!.organization_id }}>
               <span>{formatMembership({ organization, membership })}</span>
             </Link>
           </li>
@@ -182,9 +179,7 @@ function RouteComponent() {
   return (
     <div>
       <h1>Discovery flow Organization selection</h1>
-      <DiscoveredOrganizationsList
-        discovered_organizations={state.discovered_organizations}
-      />
+      <DiscoveredOrganizationsList discovered_organizations={state.discovered_organizations} />
 
       <div>
         <div>

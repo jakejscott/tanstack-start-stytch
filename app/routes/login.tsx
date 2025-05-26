@@ -11,13 +11,10 @@ export const loader = createServerFn().handler(async (ctx) => {
   const protocol = proto ? "https://" : "http://";
   const domain = protocol + host;
 
-  const googleOAuthDiscoveryStartUrl = formatOAuthDiscoveryStartURL(
-    domain,
-    "google"
-  );
+  const googleOAuthDiscoveryStartUrl = formatOAuthDiscoveryStartURL(domain, "google");
 
   return {
-    googleOAuthDiscoveryStartUrl: googleOAuthDiscoveryStartUrl,
+    googleOAuthDiscoveryStartUrl,
   };
 });
 
@@ -38,9 +35,7 @@ function RouteComponent() {
           </div>
           Acme Inc.
         </a>
-        <LoginForm
-          googleOAuthDiscoveryStartUrl={data.googleOAuthDiscoveryStartUrl}
-        />
+        <LoginForm googleOAuthDiscoveryStartUrl={data.googleOAuthDiscoveryStartUrl} />
       </div>
     </div>
   );

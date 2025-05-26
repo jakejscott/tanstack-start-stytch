@@ -4,55 +4,34 @@ let client: stytch.B2BClient;
 
 export const publicToken = process.env.STYTCH_PUBLIC_TOKEN;
 
-export type Member = Awaited<
-  ReturnType<typeof client.magicLinks.authenticate>
->["member"];
+export type Member = Awaited<ReturnType<typeof client.magicLinks.authenticate>>["member"];
 
-export type Organization = Awaited<
-  ReturnType<typeof client.organizations.get>
->["organization"];
+export type Organization = Awaited<ReturnType<typeof client.organizations.get>>["organization"];
 
-export type SessionsAuthenticateResponse = Awaited<
-  ReturnType<typeof client.sessions.authenticate>
->;
+export type SessionsAuthenticateResponse = Awaited<ReturnType<typeof client.sessions.authenticate>>;
 
-export type SAMLConnection = Awaited<
-  ReturnType<typeof client.sso.saml.createConnection>
->["connection"];
+export type SAMLConnection = Awaited<ReturnType<typeof client.sso.saml.createConnection>>["connection"];
 
-export type OIDCConnection = Awaited<
-  ReturnType<typeof client.sso.oidc.createConnection>
->["connection"];
+export type OIDCConnection = Awaited<ReturnType<typeof client.sso.oidc.createConnection>>["connection"];
 
 export type DiscoveredOrganizations = Awaited<
   ReturnType<typeof client.discovery.organizations.list>
 >["discovered_organizations"];
 
-const stytchEnv =
-  process.env.STYTCH_ENV === "live" ? stytch.envs.live : stytch.envs.test;
+const stytchEnv = process.env.STYTCH_ENV === "live" ? stytch.envs.live : stytch.envs.test;
 
-export const formatSSOStartURL = (
-  redirectDomain: string,
-  connection_id: string
-): string => {
+export const formatSSOStartURL = (redirectDomain: string, connection_id: string): string => {
   const redirectURL = redirectDomain + "/api/authenticate";
   return `${stytchEnv}v1/public/sso/start?connection_id=${connection_id}&public_token=${publicToken}&login_redirect_url=${redirectURL}&signup_redirect_url=${redirectURL}`;
 };
 
 // No need to worry about CNames for OAuth Start URL's as Stytch will automatically redirect to the registered CName
-export const formatOAuthDiscoveryStartURL = (
-  redirectDomain: string,
-  provider: string
-): string => {
+export const formatOAuthDiscoveryStartURL = (redirectDomain: string, provider: "google"): string => {
   const redirectURL = redirectDomain + "/api/authenticate";
   return `${stytchEnv}v1/b2b/public/oauth/${provider}/discovery/start?public_token=${publicToken}&discovery_redirect_url=${redirectURL}`;
 };
 
-export const formatOAuthStartURL = (
-  redirectDomain: string,
-  provider: string,
-  org_slug: string
-): string => {
+export const formatOAuthStartURL = (redirectDomain: string, provider: string, org_slug: string): string => {
   const redirectURL = redirectDomain + "/api/authenticate";
   return `${stytchEnv}v1/b2b/public/oauth/${provider}/start?public_token=${publicToken}&slug=${org_slug}&login_redirect_url=${redirectURL}&signup_redirect_url=${redirectURL}`;
 };

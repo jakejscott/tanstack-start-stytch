@@ -14,10 +14,9 @@ const loader = createServerFn().handler(async () => {
   const stytch = useStytch();
 
   try {
-    const { discovered_organizations } =
-      await stytch.discovery.organizations.list({
-        session_jwt: session.data.session_jwt,
-      });
+    const { discovered_organizations } = await stytch.discovery.organizations.list({
+      session_jwt: session.data.session_jwt,
+    });
 
     return {
       discovered_organizations: discovered_organizations,
@@ -39,28 +38,15 @@ type OrgSwitcherListProps = {
   organisation_id: string;
 };
 
-const OrgSwitcherList = ({
-  discovered_organizations,
-  organisation_id,
-}: OrgSwitcherListProps) => {
+const OrgSwitcherList = ({ discovered_organizations, organisation_id }: OrgSwitcherListProps) => {
   return (
     <div className="section">
-      <h2>Log into a different organization</h2>
-      <p>
-        Log into one of the below organizations by exchanging your current
-        session.
-      </p>
       <ul>
         {discovered_organizations.map(({ organization }) => (
           <li key={organization!.organization_id}>
-            <Link
-              to={"/discovery/$organisationId"}
-              params={{ organisationId: organization!.organization_id }}
-            >
+            <Link to={"/discovery/$organisationId"} params={{ organisationId: organization!.organization_id }}>
               <span>{organization!.organization_name}</span>
-              {organization!.organization_id === organisation_id && (
-                <span>&nbsp;(Active)</span>
-              )}
+              {organization!.organization_id === organisation_id && <span>&nbsp;(Active)</span>}
             </Link>
           </li>
         ))}

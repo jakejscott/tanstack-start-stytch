@@ -36,9 +36,7 @@ const loader = createServerFn()
       try {
         const authResult = await stytch.sessions.authenticate({
           session_jwt: session.data.session_jwt,
-          session_duration_minutes: parseInt(
-            process.env.SESSION_DURATION_MINUTES!
-          ),
+          session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
         });
 
         member_session = authResult.member_session;
@@ -59,12 +57,9 @@ const loader = createServerFn()
     };
   });
 
-export const Route = createFileRoute(
-  "/organisations/$organisationSlug/dashboard"
-)({
+export const Route = createFileRoute("/organisations/$organisationSlug/dashboard")({
   component: RouteComponent,
-  loader: async ({ params: { organisationSlug } }) =>
-    await loader({ data: { organisationSlug } }),
+  loader: async ({ params: { organisationSlug } }) => await loader({ data: { organisationSlug } }),
 });
 
 function RouteComponent() {
