@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppSession } from "@/lib/session";
 import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
-import { cn } from "@/lib/utils";
+import { cn, createSlug } from "@/lib/utils";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { Building2, GalleryVerticalEnd, Loader2 } from "lucide-react";
@@ -30,11 +30,13 @@ export const createOrganisation = createServerFn({ method: "POST" })
 
     const stytch = useStytch();
 
+    const organisationSlug = createSlug(ctx.data.organisationName);
+
     const createResult = await stytch.discovery.organizations.create({
       intermediate_session_token: session.data.intermediate_session_token,
       email_allowed_domains: [],
       organization_name: ctx.data.organisationName,
-      organization_slug: ctx.data.organisationName,
+      organization_slug: organisationSlug,
       session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
       mfa_policy: "OPTIONAL",
     });
@@ -139,22 +141,6 @@ function RouteComponent() {
       setStatus("error");
     }
   };
-
-  // const formatMembership = ({
-  //   membership,
-  //   organization,
-  // }: Pick<DiscoveredOrganizations[0], "membership" | "organization">) => {
-  //   if (membership?.type === "pending_member") {
-  //     return `Join ${organization?.organization_name}`;
-  //   }
-  //   if (membership?.type === "eligible_to_join_by_email_domain") {
-  //     return `Join ${organization?.organization_name}`;
-  //   }
-  //   if (membership?.type === "invited_member") {
-  //     return `Accept invitation to ${organization?.organization_name}`;
-  //   }
-  //   return `Log into ${organization?.organization_name}`;
-  // };
 
   const formatAction = ({ membership }: Pick<DiscoveredOrganizations[0], "membership">) => {
     if (membership?.type === "pending_member") {
