@@ -1,8 +1,8 @@
-import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { useStytch } from "@/lib/stytch";
 import { useAppSession } from "@/lib/session";
+import { createServerFileRoute } from "@tanstack/react-start/server";
 
-export const APIRoute = createAPIFileRoute("/api/authenticate")({
+export const ServerRoute = createServerFileRoute('/api/authenticate').methods({
   GET: async ({ request, params }) => {
     const url = new URL(request.url);
     const stytch_redirect_type = url.searchParams.get("stytch_redirect_type");
