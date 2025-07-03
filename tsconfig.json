@@ -4,6 +4,7 @@
     "moduleResolution": "bundler",
     "module": "ESNext",
     "skipLibCheck": true,
+    "strict": true,
     "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {

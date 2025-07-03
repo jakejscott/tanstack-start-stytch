@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppSession } from "@/lib/session";
 import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
-import { cn, createSlug } from "@/lib/utils";
+import { cn, createSlug, toDomain } from "@/lib/utils";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { Building2, GalleryVerticalEnd, Loader2 } from "lucide-react";
@@ -15,21 +15,15 @@ export type CreateOrganisationData = {
   organisationName: string;
 };
 
-function toDomain(email: string): string {
-  return email.split("@")[1];
-}
-
 export const createOrganisation = createServerFn({ method: "POST" })
   .validator((data: CreateOrganisationData) => data)
   .handler(async (ctx) => {
     const session = await useAppSession();
-
     if (!session.data.intermediate_session_token) {
       throw new Error("No intermediate session");
     }
 
     const stytch = useStytch();
-
     const organisationSlug = createSlug(ctx.data.organisationName);
 
     const createResult = await stytch.discovery.organizations.create({
@@ -46,51 +40,50 @@ export const createOrganisation = createServerFn({ method: "POST" })
     const { member, organization, session_jwt, intermediate_session_token, member_authenticated } = createResult;
 
     // Make the organization discoverable to other emails
-
-    if (organization) {
-      try {
-        await stytch.organizations.update({
-          organization_id: organization.organization_id,
-          email_jit_provisioning: "RESTRICTED",
-          sso_jit_provisioning: "ALL_ALLOWED",
-          email_allowed_domains: [toDomain(member.email_address)],
-        });
-      } catch (e) {
-        if (e instanceof StytchError && e.error_type == "organization_settings_domain_too_common") {
-          console.log("User domain is common email provider, cannot link to organization");
-        } else {
-          throw e;
-        }
-      }
-
-      // Mark the first user in the organization as the admin
-      await stytch.organizations.members.update({
-        organization_id: organization.organization_id,
-        member_id: member.member_id,
-        trusted_metadata: { admin: true },
-      });
-
-      if (session_jwt === "") {
-        console.log("session_jwt was empty, but intermediate_session_token was not");
-        throw new Error("session_jwt was empty, probably needs MFA");
-      }
-
-      await session.clear();
-      await session.update({
-        session_jwt: session_jwt,
-        email_address: member.email_address,
-        organisation_id: organization.organization_id,
-      });
-
-      throw redirect({
-        to: "/organisations/$organisationSlug/dashboard",
-        params: {
-          organisationSlug: organization.organization_slug,
-        },
-      });
+    if (!organization) {
+      throw new Error("Error creating organization");
     }
 
-    return {};
+    try {
+      await stytch.organizations.update({
+        organization_id: organization.organization_id,
+        email_jit_provisioning: "RESTRICTED",
+        sso_jit_provisioning: "ALL_ALLOWED",
+        email_allowed_domains: [toDomain(member.email_address)],
+      });
+    } catch (e) {
+      if (e instanceof StytchError && e.error_type == "organization_settings_domain_too_common") {
+        console.log("User domain is common email provider, cannot link to organization");
+      } else {
+        throw e;
+      }
+    }
+
+    // Mark the first user in the organization as the admin
+    await stytch.organizations.members.update({
+      organization_id: organization.organization_id,
+      member_id: member.member_id,
+      trusted_metadata: { admin: true },
+    });
+
+    if (session_jwt === "") {
+      console.log("session_jwt was empty, but intermediate_session_token was not");
+      throw new Error("session_jwt was empty, probably needs MFA");
+    }
+
+    await session.clear();
+    await session.update({
+      session_jwt: session_jwt,
+      email_address: member.email_address,
+      organisation_id: organization.organization_id,
+    });
+
+    throw redirect({
+      to: "/organisations/$organisationSlug/dashboard",
+      params: {
+        organisationSlug: organization.organization_slug,
+      },
+    });
   });
 
 const loader = createServerFn().handler(async () => {
@@ -135,9 +128,11 @@ function RouteComponent() {
     e.preventDefault();
     setStatus("pending");
     try {
-      await _createOrganisation({ data: { organisationName: organisationName } });
+      var response = await _createOrganisation({ data: { organisationName: organisationName } });
+      console.log("response success", response);
       setStatus("success");
     } catch (error) {
+      console.log("response error", error);
       setStatus("error");
     }
   };
