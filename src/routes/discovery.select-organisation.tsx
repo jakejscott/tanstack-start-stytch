@@ -9,10 +9,11 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { Building2, GalleryVerticalEnd, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { StytchError } from "stytch";
+import { B2BDiscoveryOrganizationsCreateResponse, StytchError } from "stytch";
+import { toast } from "sonner";
 
 export type CreateOrganisationData = {
-  organisationName: string;
+  organisationName?: string;
 };
 
 export const createOrganisation = createServerFn({ method: "POST" })
@@ -23,27 +24,64 @@ export const createOrganisation = createServerFn({ method: "POST" })
       throw new Error("No intermediate session");
     }
 
+    if (!ctx.data.organisationName) {
+      return {
+        errorMessage: "Organisation name is required",
+      };
+    }
+
+    if (!ctx.data.organisationName || ctx.data.organisationName.length <= 2) {
+      return {
+        errorMessage: "Organisation name must be at least two characters",
+      };
+    }
+
     const stytch = useStytch();
     const organisationSlug = createSlug(ctx.data.organisationName);
 
-    const createResult = await stytch.discovery.organizations.create({
-      intermediate_session_token: session.data.intermediate_session_token,
-      email_allowed_domains: [],
-      organization_name: ctx.data.organisationName,
-      organization_slug: organisationSlug,
-      session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
-      mfa_policy: "OPTIONAL",
-    });
+    let createResult: B2BDiscoveryOrganizationsCreateResponse;
+    try {
+      createResult = await stytch.discovery.organizations.create({
+        intermediate_session_token: session.data.intermediate_session_token,
+        email_allowed_domains: [],
+        organization_name: ctx.data.organisationName,
+        organization_slug: organisationSlug,
+        session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
+        mfa_policy: "OPTIONAL",
+      });
+    } catch (e) {
+      console.log("Error creating organisation", e);
+      if (e instanceof StytchError) {
+        // "error_type": "organization_slug_already_used",
+        // "error_message": "The provided organization_slug is already used in another organization.",
+
+        //
+        // error_type: 'invalid_organization_slug',
+        // error_message: "The organization_slug must be at least 2 characters long and may only contain alphanumerics and the reserved characters '-', '.', '_', or '~'. At least one character must be alphanumeric.",
+        //
+
+        if (e.error_type == "organization_slug_already_used") {
+          return {
+            errorMessage: "The provided organization name is already taken.",
+          };
+        }
+
+        return {
+          errorMessage: e.error_message,
+        };
+      } else {
+        throw e;
+      }
+    }
 
     console.log("org create result", createResult);
 
     const { member, organization, session_jwt, intermediate_session_token, member_authenticated } = createResult;
-
-    // Make the organization discoverable to other emails
     if (!organization) {
       throw new Error("Error creating organization");
     }
 
+    // Make the organization discoverable to other emails
     try {
       await stytch.organizations.update({
         organization_id: organization.organization_id,
@@ -129,11 +167,17 @@ function RouteComponent() {
     setStatus("pending");
     try {
       var response = await _createOrganisation({ data: { organisationName: organisationName } });
-      console.log("response success", response);
-      setStatus("success");
+      if (response.errorMessage) {
+        setStatus("error");
+        toast(response.errorMessage);
+      } else {
+        console.log("response success", response);
+        setStatus("success");
+      }
     } catch (error) {
-      console.log("response error", error);
+      console.log("error creating organisation", error);
       setStatus("error");
+      toast("There was an error creating the organisation");
     }
   };
 
@@ -223,7 +267,6 @@ function RouteComponent() {
                         id="organisationName"
                         type="text"
                         placeholder=""
-                        required
                         value={organisationName}
                         disabled={status === "pending"}
                         onChange={(e) => {
