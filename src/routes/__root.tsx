@@ -1,9 +1,11 @@
 import { ReactNode } from "react";
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import appCss from "@/styles/app.css?url";
 import { seo } from "@/lib/seo";
 import { DefaultCatchBoundary } from "@/components/default-catch-boundary";
 import { NotFound } from "@/components/not-found";
+import { Toaster } from "sonner";
+
+import appCss from "@/styles/app.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -70,6 +72,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body>
         {children}
+        <Toaster />
         <Scripts />
       </body>
     </html>
