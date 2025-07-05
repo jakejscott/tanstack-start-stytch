@@ -5,12 +5,12 @@ import { Label } from "@/components/ui/label";
 import { useAppSession } from "@/lib/session";
 import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
 import { cn, createSlug, toDomain } from "@/lib/utils";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { Building2, GalleryVerticalEnd, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { B2BDiscoveryOrganizationsCreateResponse, StytchError } from "stytch";
 import { toast } from "sonner";
+import { B2BDiscoveryOrganizationsCreateResponse, StytchError } from "stytch";
 
 export type CreateOrganisationData = {
   organisationName?: string;
@@ -52,14 +52,6 @@ export const createOrganisation = createServerFn({ method: "POST" })
     } catch (e) {
       console.log("Error creating organisation", e);
       if (e instanceof StytchError) {
-        // "error_type": "organization_slug_already_used",
-        // "error_message": "The provided organization_slug is already used in another organization.",
-
-        //
-        // error_type: 'invalid_organization_slug',
-        // error_message: "The organization_slug must be at least 2 characters long and may only contain alphanumerics and the reserved characters '-', '.', '_', or '~'. At least one character must be alphanumeric.",
-        //
-
         if (e.error_type == "organization_slug_already_used") {
           return {
             errorMessage: "The provided organization name is already taken.",
@@ -74,9 +66,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
       }
     }
 
-    console.log("org create result", createResult);
-
-    const { member, organization, session_jwt, intermediate_session_token, member_authenticated } = createResult;
+    const { member, organization, session_jwt } = createResult;
     if (!organization) {
       throw new Error("Error creating organization");
     }
@@ -116,18 +106,14 @@ export const createOrganisation = createServerFn({ method: "POST" })
       organisation_id: organization.organization_id,
     });
 
-    throw redirect({
-      to: "/organisations/$organisationSlug/dashboard",
-      params: {
-        organisationSlug: organization.organization_slug,
-      },
-    });
+    return {
+      organisationSlug: organization.organization_slug,
+    };
   });
 
 const loader = createServerFn().handler(async () => {
   const session = await useAppSession();
   if (!session.data.intermediate_session_token) {
-    console.error("No intermediate session token was found");
     throw redirect({ to: "/" });
   }
 
@@ -144,7 +130,7 @@ const loader = createServerFn().handler(async () => {
       discovered_organizations: discovered_organizations,
     };
   } catch (error) {
-    console.log("Something went wrong here", error);
+    console.log("Error getting organizations list", error);
     throw redirect({ to: "/" });
   }
 });
@@ -156,6 +142,7 @@ export const Route = createFileRoute("/discovery/select-organisation")({
 
 function RouteComponent() {
   const state = Route.useLoaderData();
+  const router = useRouter();
 
   const [organisationName, setOrganisationName] = useState("");
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
@@ -170,9 +157,15 @@ function RouteComponent() {
       if (response.errorMessage) {
         setStatus("error");
         toast.error(response.errorMessage);
-      } else {
-        console.log("response success", response);
+      } else if (response.organisationSlug) {
         setStatus("success");
+        toast.success(`Organisation: ${organisationName} was created`);
+        router.navigate({
+          to: "/organisations/$organisationSlug/dashboard",
+          params: {
+            organisationSlug: response.organisationSlug,
+          },
+        });
       }
     } catch (error) {
       console.log("error creating organisation", error);
