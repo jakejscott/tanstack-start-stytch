@@ -169,7 +169,7 @@ function RouteComponent() {
       var response = await _createOrganisation({ data: { organisationName: organisationName } });
       if (response.errorMessage) {
         setStatus("error");
-        toast(response.errorMessage);
+        toast.error(response.errorMessage);
       } else {
         console.log("response success", response);
         setStatus("success");

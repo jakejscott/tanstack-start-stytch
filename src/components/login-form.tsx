@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
 
 export const loginFn = createServerFn({ method: "POST" })
   .validator((data: { email: string }) => data)
@@ -17,7 +18,6 @@ export const loginFn = createServerFn({ method: "POST" })
       email_address: ctx.data.email,
       discovery_redirect_url: "http://localhost:3000/api/authenticate",
     });
-    return {};
   });
 
 export function LoginForm(props: { googleOAuthDiscoveryStartUrl: string }) {
@@ -33,6 +33,7 @@ export function LoginForm(props: { googleOAuthDiscoveryStartUrl: string }) {
       await _loginFn({ data: { email: email } });
       setStatus("success");
     } catch (error) {
+      toast.error("Something went wrong, please try again soon");
       setStatus("error");
     }
   };
