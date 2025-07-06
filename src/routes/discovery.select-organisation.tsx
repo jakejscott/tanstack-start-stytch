@@ -30,7 +30,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
       };
     }
 
-    if (!ctx.data.organisationName || ctx.data.organisationName.length <= 2) {
+    if (!ctx.data.organisationName || ctx.data.organisationName.length < 2) {
       return {
         errorMessage: "Organisation name must be at least two characters",
       };
@@ -254,6 +254,8 @@ function RouteComponent() {
                         id="organisationName"
                         type="text"
                         placeholder=""
+                        required={true}
+                        minLength={2}
                         value={organisationName}
                         disabled={status === "pending"}
                         onChange={(e) => {
