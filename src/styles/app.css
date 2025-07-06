@@ -1,7 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -125,8 +124,8 @@
 
 html {
   font-family:
-    "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
   font-feature-settings: normal;
   font-variation-settings: normal;
   font-synthesis-weight: none;
