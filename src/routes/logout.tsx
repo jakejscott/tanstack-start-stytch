@@ -7,18 +7,17 @@ const loader = createServerFn().handler(async () => {
   const session = await useAppSession();
   const stytch = useStytch();
 
-  if (session.data.session_jwt) {
+  if (session.data.sessionJwt) {
     try {
       await stytch.sessions.revoke({
-        session_jwt: session.data.session_jwt,
+        session_jwt: session.data.sessionJwt,
       });
     } catch (error) {
-      console.warn("Unable to revoke session", error);
+      // console.warn("Unable to revoke session", error);
     }
   }
 
   await session.clear();
-  console.log("logout");
 
   throw redirect({
     to: "/",

@@ -13,47 +13,43 @@ const loader = createServerFn()
   .handler(async ({ data }) => {
     const session = await useAppSession();
 
-    if (!session.data.session_jwt) {
-      console.error("No session_jwt");
+    if (!session.data.sessionJwt) {
+      // console.error("No session_jwt");
       throw redirect({ to: "/" });
     }
 
     const stytch = useStytch();
 
-    let member_session: MemberSession | null = null;
-
+    let memberSession: MemberSession | null = null;
     try {
-      member_session = await stytch.sessions.authenticateJwtLocal({
-        session_jwt: session.data.session_jwt,
+      memberSession = await stytch.sessions.authenticateJwtLocal({
+        session_jwt: session.data.sessionJwt,
         max_token_age_seconds: parseInt(process.env.MAX_TOKEN_AGE_SECONDS!),
       });
     } catch (err) {
-      //
-      console.log("JWT token local validation expired");
+      // console.log("JWT token local validation expired");
     }
 
-    if (!member_session) {
+    if (!memberSession) {
       try {
         const authResult = await stytch.sessions.authenticate({
-          session_jwt: session.data.session_jwt,
+          session_jwt: session.data.sessionJwt,
           session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
         });
-
-        member_session = authResult.member_session;
-
+        memberSession = authResult.member_session;
         await session.update({
-          session_jwt: authResult.session_jwt,
+          sessionJwt: authResult.session_jwt,
         });
       } catch (err) {
-        console.error("Could not find member by session token", err);
+        // console.error("Could not find member by session token", err);
         throw redirect({ to: "/" });
       }
     }
 
     return {
-      organization_id: member_session.organization_id,
-      organisation_slug: data.organisationSlug,
-      member_session: member_session,
+      organizationId: memberSession.organization_id,
+      organisationSlug: data.organisationSlug,
+      memberSession: memberSession,
     };
   });
 
@@ -67,9 +63,9 @@ function RouteComponent() {
   return (
     <div>
       <div>
-        <p>{data.organisation_slug}</p>
-        <p>{data.organization_id}</p>
-        <pre>{JSON.stringify(data.member_session, null, 2)}</pre>
+        <p>{data.organisationSlug}</p>
+        <p>{data.organizationId}</p>
+        <pre>{JSON.stringify(data.memberSession, null, 2)}</pre>
         <hr />
         <p>
           <Link to="/discovery/switch-organisation">Switch Organisation</Link>

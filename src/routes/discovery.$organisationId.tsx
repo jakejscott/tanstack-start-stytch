@@ -14,16 +14,16 @@ const loader = createServerFn()
 
     const stytch = useStytch();
 
-    if (session.data.session_jwt) {
-      console.log("switching orgs using session_jwt", session.data);
+    if (session.data.sessionJwt) {
+      // console.log("switching orgs using session_jwt", session.data);
 
       const exchangeSessionResult = await stytch.sessions.exchange({
         organization_id: data.organisationId,
-        session_jwt: session.data.session_jwt,
+        session_jwt: session.data.sessionJwt,
         session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
       });
 
-      console.log("Session exchange result", exchangeSessionResult);
+      // console.log("Session exchange result", exchangeSessionResult);
 
       const { session_jwt, organization, member } = exchangeSessionResult;
 
@@ -34,9 +34,9 @@ const loader = createServerFn()
 
       await session.clear();
       await session.update({
-        session_jwt: session_jwt,
-        email_address: member.email_address,
-        organisation_id: organization.organization_id,
+        sessionJwt: session_jwt,
+        emailAddress: member.email_address,
+        organisationId: organization.organization_id,
       });
 
       throw redirect({
@@ -48,11 +48,11 @@ const loader = createServerFn()
       });
     }
 
-    if (session.data.intermediate_session_token) {
-      console.log("switching orgs using intermediate_session_token");
+    if (session.data.intermediateSessionToken) {
+      // console.log("switching orgs using intermediate_session_token");
 
       const { session_jwt, organization, member } = await stytch.discovery.intermediateSessions.exchange({
-        intermediate_session_token: session.data.intermediate_session_token,
+        intermediate_session_token: session.data.intermediateSessionToken,
         organization_id: data.organisationId,
         session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
       });
@@ -64,9 +64,9 @@ const loader = createServerFn()
 
       await session.clear();
       await session.update({
-        session_jwt: session_jwt,
-        email_address: member.email_address,
-        organisation_id: organization.organization_id,
+        sessionJwt: session_jwt,
+        emailAddress: member.email_address,
+        organisationId: organization.organization_id,
       });
 
       throw redirect({
@@ -78,7 +78,7 @@ const loader = createServerFn()
       });
     }
 
-    console.log("no session tokens, todo redirect to logout");
+    // console.log("no session tokens, todo redirect to logout");
     throw redirect({ to: "/" });
   });
 

@@ -6,8 +6,8 @@ import { useAppSession } from "@/lib/session";
 const loader = createServerFn().handler(async () => {
   const session = await useAppSession();
 
-  if (!session.data.session_jwt) {
-    console.error("No intermediate session token was found");
+  if (!session.data.sessionJwt) {
+    // console.error("No intermediate session token was found");
     throw redirect({ to: "/" });
   }
 
@@ -15,15 +15,15 @@ const loader = createServerFn().handler(async () => {
 
   try {
     const { discovered_organizations } = await stytch.discovery.organizations.list({
-      session_jwt: session.data.session_jwt,
+      session_jwt: session.data.sessionJwt,
     });
 
     return {
       discovered_organizations: discovered_organizations,
-      organisation_id: session.data.organisation_id,
+      organisationId: session.data.organisationId,
     };
   } catch (error) {
-    console.log("Something went wrong here", error);
+    // console.log("Something went wrong here", error);
     throw redirect({ to: "/" });
   }
 });
@@ -60,10 +60,7 @@ function RouteComponent() {
   return (
     <div>
       <h1>Switch Organisations</h1>
-      <OrgSwitcherList
-        discovered_organizations={data.discovered_organizations}
-        organisation_id={data.organisation_id}
-      />
+      <OrgSwitcherList discovered_organizations={data.discovered_organizations} organisation_id={data.organisationId} />
     </div>
   );
 }

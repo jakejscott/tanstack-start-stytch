@@ -20,7 +20,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
   .validator((data: CreateOrganisationData) => data)
   .handler(async (ctx) => {
     const session = await useAppSession();
-    if (!session.data.intermediate_session_token) {
+    if (!session.data.intermediateSessionToken) {
       throw new Error("No intermediate session");
     }
 
@@ -42,7 +42,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
     let createResult: B2BDiscoveryOrganizationsCreateResponse;
     try {
       createResult = await stytch.discovery.organizations.create({
-        intermediate_session_token: session.data.intermediate_session_token,
+        intermediate_session_token: session.data.intermediateSessionToken,
         email_allowed_domains: [],
         organization_name: ctx.data.organisationName,
         organization_slug: organisationSlug,
@@ -50,7 +50,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
         mfa_policy: "OPTIONAL",
       });
     } catch (e) {
-      console.log("Error creating organisation", e);
+      // console.log("Error creating organisation", e);
       if (e instanceof StytchError) {
         if (e.error_type == "organization_slug_already_used") {
           return {
@@ -81,7 +81,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
       });
     } catch (e) {
       if (e instanceof StytchError && e.error_type == "organization_settings_domain_too_common") {
-        console.log("User domain is common email provider, cannot link to organization");
+        // console.log("User domain is common email provider, cannot link to organization");
       } else {
         throw e;
       }
@@ -95,15 +95,15 @@ export const createOrganisation = createServerFn({ method: "POST" })
     });
 
     if (session_jwt === "") {
-      console.log("session_jwt was empty, but intermediate_session_token was not");
+      // console.log("session_jwt was empty, but intermediate_session_token was not");
       throw new Error("session_jwt was empty, probably needs MFA");
     }
 
     await session.clear();
     await session.update({
-      session_jwt: session_jwt,
-      email_address: member.email_address,
-      organisation_id: organization.organization_id,
+      sessionJwt: session_jwt,
+      emailAddress: member.email_address,
+      organisationId: organization.organization_id,
     });
 
     return {
@@ -113,7 +113,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
 
 const loader = createServerFn().handler(async () => {
   const session = await useAppSession();
-  if (!session.data.intermediate_session_token) {
+  if (!session.data.intermediateSessionToken) {
     throw redirect({ to: "/" });
   }
 
@@ -121,16 +121,16 @@ const loader = createServerFn().handler(async () => {
 
   try {
     const { discovered_organizations } = await stytch.discovery.organizations.list({
-      intermediate_session_token: session.data.intermediate_session_token,
+      intermediate_session_token: session.data.intermediateSessionToken,
       session_jwt: undefined,
     });
 
     return {
-      intermediate_session: session.data.intermediate_session_token,
+      intermediate_session: session.data.intermediateSessionToken,
       discovered_organizations: discovered_organizations,
     };
   } catch (error) {
-    console.log("Error getting organizations list", error);
+    // console.log("Error getting organizations list", error);
     throw redirect({ to: "/" });
   }
 });
@@ -168,7 +168,7 @@ function RouteComponent() {
         });
       }
     } catch (error) {
-      console.log("error creating organisation", error);
+      // console.log("error creating organisation", error);
       setStatus("error");
       toast("There was an error creating the organisation");
     }

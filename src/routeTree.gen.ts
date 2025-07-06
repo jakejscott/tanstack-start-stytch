@@ -13,7 +13,7 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as ExampleDashboardRouteImport } from './routes/example-dashboard'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscoverySwitchOrganisationRouteImport } from './routes/discovery.switch-organisation'
 import { Route as DiscoverySelectOrganisationRouteImport } from './routes/discovery.select-organisation'
@@ -33,9 +33,9 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ExampleDashboardRoute = ExampleDashboardRouteImport.update({
-  id: '/example-dashboard',
-  path: '/example-dashboard',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -74,7 +74,7 @@ const ApiAuthenticateServerRoute = ApiAuthenticateServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/example-dashboard': typeof ExampleDashboardRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
@@ -84,7 +84,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/example-dashboard': typeof ExampleDashboardRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
@@ -95,7 +95,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/example-dashboard': typeof ExampleDashboardRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
@@ -107,7 +107,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/example-dashboard'
+    | '/dashboard'
     | '/login'
     | '/logout'
     | '/discovery/$organisationId'
@@ -117,7 +117,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/example-dashboard'
+    | '/dashboard'
     | '/login'
     | '/logout'
     | '/discovery/$organisationId'
@@ -127,7 +127,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/example-dashboard'
+    | '/dashboard'
     | '/login'
     | '/logout'
     | '/discovery/$organisationId'
@@ -138,7 +138,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ExampleDashboardRoute: typeof ExampleDashboardRoute
+  DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
   DiscoveryOrganisationIdRoute: typeof DiscoveryOrganisationIdRoute
@@ -184,11 +184,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/example-dashboard': {
-      id: '/example-dashboard'
-      path: '/example-dashboard'
-      fullPath: '/example-dashboard'
-      preLoaderRoute: typeof ExampleDashboardRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -242,7 +242,7 @@ declare module '@tanstack/react-start/server' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ExampleDashboardRoute: ExampleDashboardRoute,
+  DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
   DiscoveryOrganisationIdRoute: DiscoveryOrganisationIdRoute,
