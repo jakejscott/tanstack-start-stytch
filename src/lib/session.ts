@@ -3,8 +3,9 @@ import { useSession } from "@tanstack/react-start/server";
 type AppSession = {
   intermediateSessionToken: string;
   sessionJwt: string;
-  emailAddress: string;
+  email: string;
   organisationId: string;
+  memberId: string;
 };
 
 export function useAppSession() {

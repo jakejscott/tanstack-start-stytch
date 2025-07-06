@@ -14,6 +14,7 @@ export const loginFn = createServerFn({ method: "POST" })
   .validator((data: { email: string }) => data)
   .handler(async (ctx) => {
     const stytch = useStytch();
+
     await stytch.magicLinks.email.discovery.send({
       email_address: ctx.data.email,
       discovery_redirect_url: "http://localhost:3000/api/authenticate",

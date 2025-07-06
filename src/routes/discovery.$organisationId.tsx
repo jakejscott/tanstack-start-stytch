@@ -35,15 +35,13 @@ const loader = createServerFn()
       await session.clear();
       await session.update({
         sessionJwt: session_jwt,
-        emailAddress: member.email_address,
+        email: member.email_address,
         organisationId: organization.organization_id,
+        memberId: member.member_id,
       });
 
       throw redirect({
-        to: "/organisations/$organisationSlug/dashboard",
-        params: {
-          organisationSlug: organization.organization_slug,
-        },
+        to: "/dashboard",
         statusCode: 307,
       });
     }
@@ -65,15 +63,13 @@ const loader = createServerFn()
       await session.clear();
       await session.update({
         sessionJwt: session_jwt,
-        emailAddress: member.email_address,
+        email: member.email_address,
         organisationId: organization.organization_id,
+        memberId: member.member_id,
       });
 
       throw redirect({
-        to: "/organisations/$organisationSlug/dashboard",
-        params: {
-          organisationSlug: organization.organization_slug,
-        },
+        to: "/dashboard",
         statusCode: 307,
       });
     }

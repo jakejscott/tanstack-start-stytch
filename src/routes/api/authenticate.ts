@@ -3,7 +3,7 @@ import { useAppSession } from "@/lib/session";
 import { createServerFileRoute } from "@tanstack/react-start/server";
 
 export const ServerRoute = createServerFileRoute("/api/authenticate").methods({
-  GET: async ({ request, params }) => {
+  GET: async ({ request }) => {
     const url = new URL(request.url);
     // const stytch_redirect_type = url.searchParams.get("stytch_redirect_type");
     const stytch_token_type = url.searchParams.get("stytch_token_type");
@@ -20,7 +20,7 @@ export const ServerRoute = createServerFileRoute("/api/authenticate").methods({
 
         await session.update({
           intermediateSessionToken: intermediate_session_token,
-          emailAddress: email_address,
+          email: email_address,
           sessionJwt: undefined,
         });
 
@@ -50,7 +50,7 @@ export const ServerRoute = createServerFileRoute("/api/authenticate").methods({
 
         await session.update({
           intermediateSessionToken: intermediate_session_token,
-          emailAddress: email_address,
+          email: email_address,
           sessionJwt: undefined,
         });
 

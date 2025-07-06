@@ -102,7 +102,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
     await session.clear();
     await session.update({
       sessionJwt: session_jwt,
-      emailAddress: member.email_address,
+      email: member.email_address,
       organisationId: organization.organization_id,
     });
 
@@ -158,14 +158,8 @@ function RouteComponent() {
         setStatus("error");
         toast.error(response.errorMessage);
       } else if (response.organisationSlug) {
-        setStatus("success");
         toast.success(`Organisation: ${organisationName} was created`);
-        router.navigate({
-          to: "/organisations/$organisationSlug/dashboard",
-          params: {
-            organisationSlug: response.organisationSlug,
-          },
-        });
+        router.navigate({ to: "/dashboard" });
       }
     } catch (error) {
       // console.log("error creating organisation", error);

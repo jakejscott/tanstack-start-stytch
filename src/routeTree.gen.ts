@@ -13,12 +13,13 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ExampleDashboardRouteImport } from './routes/example-dashboard'
+import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscoverySwitchOrganisationRouteImport } from './routes/discovery.switch-organisation'
 import { Route as DiscoverySelectOrganisationRouteImport } from './routes/discovery.select-organisation'
 import { Route as DiscoveryOrganisationIdRouteImport } from './routes/discovery.$organisationId'
-import { Route as OrganisationsOrganisationSlugDashboardRouteImport } from './routes/organisations.$organisationSlug.dashboard'
+import { Route as AuthedDashboardRouteImport } from './routes/_authed.dashboard'
 import { ServerRoute as ApiAuthenticateServerRouteImport } from './routes/api/authenticate'
 
 const rootServerRouteImport = createServerRootRoute()
@@ -33,9 +34,13 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const ExampleDashboardRoute = ExampleDashboardRouteImport.update({
+  id: '/example-dashboard',
+  path: '/example-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -60,12 +65,11 @@ const DiscoveryOrganisationIdRoute = DiscoveryOrganisationIdRouteImport.update({
   path: '/discovery/$organisationId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrganisationsOrganisationSlugDashboardRoute =
-  OrganisationsOrganisationSlugDashboardRouteImport.update({
-    id: '/organisations/$organisationSlug/dashboard',
-    path: '/organisations/$organisationSlug/dashboard',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const ApiAuthenticateServerRoute = ApiAuthenticateServerRouteImport.update({
   id: '/api/authenticate',
   path: '/api/authenticate',
@@ -74,77 +78,79 @@ const ApiAuthenticateServerRoute = ApiAuthenticateServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/example-dashboard': typeof ExampleDashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/dashboard': typeof AuthedDashboardRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
-  '/organisations/$organisationSlug/dashboard': typeof OrganisationsOrganisationSlugDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/example-dashboard': typeof ExampleDashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/dashboard': typeof AuthedDashboardRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
-  '/organisations/$organisationSlug/dashboard': typeof OrganisationsOrganisationSlugDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/_authed': typeof AuthedRouteWithChildren
+  '/example-dashboard': typeof ExampleDashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/_authed/dashboard': typeof AuthedDashboardRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
-  '/organisations/$organisationSlug/dashboard': typeof OrganisationsOrganisationSlugDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
+    | '/example-dashboard'
     | '/login'
     | '/logout'
+    | '/dashboard'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
-    | '/organisations/$organisationSlug/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
+    | '/example-dashboard'
     | '/login'
     | '/logout'
+    | '/dashboard'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
-    | '/organisations/$organisationSlug/dashboard'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
+    | '/_authed'
+    | '/example-dashboard'
     | '/login'
     | '/logout'
+    | '/_authed/dashboard'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
-    | '/organisations/$organisationSlug/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
+  ExampleDashboardRoute: typeof ExampleDashboardRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
   DiscoveryOrganisationIdRoute: typeof DiscoveryOrganisationIdRoute
   DiscoverySelectOrganisationRoute: typeof DiscoverySelectOrganisationRoute
   DiscoverySwitchOrganisationRoute: typeof DiscoverySwitchOrganisationRoute
-  OrganisationsOrganisationSlugDashboardRoute: typeof OrganisationsOrganisationSlugDashboardRoute
 }
 export interface FileServerRoutesByFullPath {
   '/api/authenticate': typeof ApiAuthenticateServerRoute
@@ -184,11 +190,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/example-dashboard': {
+      id: '/example-dashboard'
+      path: '/example-dashboard'
+      fullPath: '/example-dashboard'
+      preLoaderRoute: typeof ExampleDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -219,12 +232,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiscoveryOrganisationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/organisations/$organisationSlug/dashboard': {
-      id: '/organisations/$organisationSlug/dashboard'
-      path: '/organisations/$organisationSlug/dashboard'
-      fullPath: '/organisations/$organisationSlug/dashboard'
-      preLoaderRoute: typeof OrganisationsOrganisationSlugDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authed/dashboard': {
+      id: '/_authed/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
     }
   }
 }
@@ -240,16 +253,26 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedDashboardRoute: typeof AuthedDashboardRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedDashboardRoute: AuthedDashboardRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  AuthedRoute: AuthedRouteWithChildren,
+  ExampleDashboardRoute: ExampleDashboardRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
   DiscoveryOrganisationIdRoute: DiscoveryOrganisationIdRoute,
   DiscoverySelectOrganisationRoute: DiscoverySelectOrganisationRoute,
   DiscoverySwitchOrganisationRoute: DiscoverySwitchOrganisationRoute,
-  OrganisationsOrganisationSlugDashboardRoute:
-    OrganisationsOrganisationSlugDashboardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
