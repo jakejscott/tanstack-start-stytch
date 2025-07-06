@@ -42,9 +42,10 @@ const authenticate = createServerFn().handler(async () => {
   }
 
   return {
-    organisationId: session.data.organisationId,
-    memberId: session.data.memberId,
     email: session.data.email,
+    organisationId: session.data.organisationId,
+    organisationName: session.data.organisationName,
+    memberId: session.data.memberId,
   };
 });
 
@@ -55,6 +56,7 @@ export const Route = createFileRoute("/_authed")({
 
     return {
       organisationId: data.organisationId,
+      organisationName: data.organisationName,
       memberId: data.memberId,
       email: data.email,
     };

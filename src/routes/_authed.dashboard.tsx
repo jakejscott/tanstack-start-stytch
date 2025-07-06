@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authed/dashboard")({
 });
 
 function RouteComponent() {
-  const { email, memberId, organisationId } = Route.useRouteContext();
+  const { email, memberId, organisationId, organisationName } = Route.useRouteContext();
 
   return (
     <SidebarProvider>
@@ -52,6 +52,7 @@ function RouteComponent() {
                 <li>email: {email} </li>
                 <li>memberId: {memberId}</li>
                 <li>organisationId: {organisationId}</li>
+                <li>organisationName: {organisationName}</li>
               </ul>
             </div>
             <div className="aspect-video rounded-xl bg-muted/50"></div>

@@ -5,6 +5,7 @@ type AppSession = {
   sessionJwt: string;
   email: string;
   organisationId: string;
+  organisationName: string;
   memberId: string;
 };
 

@@ -37,6 +37,7 @@ const loader = createServerFn()
         sessionJwt: session_jwt,
         email: member.email_address,
         organisationId: organization.organization_id,
+        organisationName: organization.organization_name,
         memberId: member.member_id,
       });
 
@@ -65,6 +66,7 @@ const loader = createServerFn()
         sessionJwt: session_jwt,
         email: member.email_address,
         organisationId: organization.organization_id,
+        organisationName: organization.organization_name,
         memberId: member.member_id,
       });
 
