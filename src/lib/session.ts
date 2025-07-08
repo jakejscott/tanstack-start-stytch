@@ -7,6 +7,7 @@ type AppSession = {
   organisationId: string;
   organisationName: string;
   memberId: string;
+  darkMode: "dark" | "light";
 };
 
 export function useAppSession() {

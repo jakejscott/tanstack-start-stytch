@@ -6,6 +6,15 @@ import { NotFound } from "@/components/not-found";
 import { Toaster } from "sonner";
 
 import appCss from "@/styles/app.css?url";
+import { createServerFn } from "@tanstack/react-start";
+import { useAppSession } from "@/lib/session";
+
+export const loader = createServerFn().handler(async () => {
+  const session = await useAppSession();
+  return {
+    darkmode: session.data.darkMode ?? "dark",
+  };
+});
 
 export const Route = createRootRoute({
   head: () => ({
@@ -54,6 +63,7 @@ export const Route = createRootRoute({
   },
   notFoundComponent: () => <NotFound />,
   component: RootComponent,
+  loader: async () => await loader(),
 });
 
 function RootComponent() {
@@ -65,8 +75,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  const data = Route.useLoaderData();
   return (
-    <html className="dark">
+    <html className={data.darkmode}>
       <head>
         <HeadContent />
       </head>
