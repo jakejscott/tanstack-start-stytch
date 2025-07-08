@@ -47,6 +47,10 @@ export function NavUser({
     }
   };
 
+  const handleLogout = async () => {
+    router.navigate({ to: "/logout" });
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -141,11 +145,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link to={"/logout"}>
-                <LogOut />
-              </Link>
-              <Link to={"/logout"}>Log out</Link>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut />
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
