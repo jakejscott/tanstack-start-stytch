@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppSession } from "@/lib/session";
-import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
+import { useStytch } from "@/lib/stytch";
 import { cn, createSlug, toDomain } from "@/lib/utils";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
@@ -14,6 +14,15 @@ import { B2BDiscoveryOrganizationsCreateResponse, StytchError } from "stytch";
 
 export type CreateOrganisationData = {
   organisationName?: string;
+};
+
+type DiscoveredOrganisation = {
+  organisationId: string;
+  organisationName: string;
+  organisationSlug: string;
+  membershipType: string;
+  membershipMemberId: string;
+  membershipRoles: string[];
 };
 
 export const createOrganisation = createServerFn({ method: "POST" })
@@ -125,9 +134,17 @@ const loader = createServerFn().handler(async () => {
       session_jwt: undefined,
     });
 
+    const organisations: DiscoveredOrganisation[] = discovered_organizations.map((item) => ({
+      organisationId: item.organization!.organization_id,
+      organisationName: item.organization!.organization_name,
+      organisationSlug: item.organization!.organization_slug,
+      membershipType: item.membership!.type,
+      membershipMemberId: item.membership!.member!.member_id,
+      membershipRoles: item.membership!.member!.roles.map((x) => x.role_id),
+    }));
+
     return {
-      intermediate_session: session.data.intermediateSessionToken,
-      discovered_organizations: discovered_organizations,
+      organisations: organisations,
     };
   } catch (error) {
     // console.log("Error getting organizations list", error);
@@ -168,14 +185,14 @@ function RouteComponent() {
     }
   };
 
-  const formatAction = ({ membership }: Pick<DiscoveredOrganizations[0], "membership">) => {
-    if (membership?.type === "pending_member") {
+  const formatAction = ({ membershipType }: DiscoveredOrganisation) => {
+    if (membershipType === "pending_member") {
       return `Join`;
     }
-    if (membership?.type === "eligible_to_join_by_email_domain") {
+    if (membershipType === "eligible_to_join_by_email_domain") {
       return `Join`;
     }
-    if (membership?.type === "invited_member") {
+    if (membershipType === "invited_member") {
       return `Accept invitation`;
     }
     return `Select`;
@@ -195,27 +212,23 @@ function RouteComponent() {
           <Card>
             <CardHeader className="text-center">
               <CardTitle className="text-xl">
-                {state.discovered_organizations.length == 0 && <>Create Organization</>}
-                {state.discovered_organizations.length > 0 && <>Select Organization</>}
+                {state.organisations.length == 0 && <>Create Organization</>}
+                {state.organisations.length > 0 && <>Select Organization</>}
               </CardTitle>
               <CardDescription>
-                {state.discovered_organizations.length == 0 && (
-                  <>Let's get started by creating your first organization.</>
-                )}
-                {state.discovered_organizations.length > 0 && (
-                  <>Choose an organization to continue, or create a new one</>
-                )}
+                {state.organisations.length == 0 && <>Let's get started by creating your first organization.</>}
+                {state.organisations.length > 0 && <>Choose an organization to continue, or create a new one</>}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6">
-                {state.discovered_organizations.length > 0 && (
+                {state.organisations.length > 0 && (
                   <div className="space-y-2">
-                    {state.discovered_organizations.map(({ organization, membership }) => (
+                    {state.organisations.map((organisation) => (
                       <Link
                         to={"/discovery/$organisationId"}
-                        params={{ organisationId: organization!.organization_id }}
-                        key={organization!.organization_id}
+                        params={{ organisationId: organisation.organisationId }}
+                        key={organisation.organisationId}
                         className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
                       >
                         <div className="flex items-center gap-3">
@@ -223,24 +236,22 @@ function RouteComponent() {
                             <Building2 className="h-5 w-5 text-primary" />
                           </div>
                           <div>
-                            <p className="font-medium">{organization?.organization_name}</p>
+                            <p className="font-medium">{organisation.organisationName}</p>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span className="capitalize">
-                                {membership!.member!.roles.map((x) => x.role_id).join(", ")}
-                              </span>
+                              <span className="capitalize">{organisation.membershipRoles.join(", ")}</span>
                             </div>
                           </div>
                         </div>
 
                         <Button variant="ghost" size="sm" className="cursor-pointer">
-                          {formatAction({ membership: membership })}
+                          {formatAction(organisation)}
                         </Button>
                       </Link>
                     ))}
                   </div>
                 )}
 
-                {state.discovered_organizations.length > 0 && (
+                {state.organisations.length > 0 && (
                   <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                     <span className="bg-card text-muted-foreground relative z-10 px-2">Or create new organization</span>
                   </div>

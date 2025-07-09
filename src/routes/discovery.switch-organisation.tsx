@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { DiscoveredOrganizations, useStytch } from "@/lib/stytch";
+import { DiscoveredOrganisation, useStytch } from "@/lib/stytch";
 import { useAppSession } from "@/lib/session";
 
 const loader = createServerFn().handler(async () => {
@@ -18,8 +18,17 @@ const loader = createServerFn().handler(async () => {
       session_jwt: session.data.sessionJwt,
     });
 
+    const organisations: DiscoveredOrganisation[] = discovered_organizations.map((item) => ({
+      organisationId: item.organization!.organization_id,
+      organisationName: item.organization!.organization_name,
+      organisationSlug: item.organization!.organization_slug,
+      membershipType: item.membership!.type,
+      membershipMemberId: item.membership!.member!.member_id,
+      membershipRoles: item.membership!.member!.roles.map((x) => x.role_id),
+    }));
+
     return {
-      discovered_organizations: discovered_organizations,
+      organisations: organisations,
       organisationId: session.data.organisationId,
     };
   } catch (error) {
@@ -34,19 +43,19 @@ export const Route = createFileRoute("/discovery/switch-organisation")({
 });
 
 type OrgSwitcherListProps = {
-  discovered_organizations: DiscoveredOrganizations;
-  organisation_id: string;
+  organisationId: string;
+  organisations: DiscoveredOrganisation[];
 };
 
-const OrgSwitcherList = ({ discovered_organizations, organisation_id }: OrgSwitcherListProps) => {
+const OrgSwitcherList = (props: OrgSwitcherListProps) => {
   return (
     <div className="section">
       <ul>
-        {discovered_organizations.map(({ organization }) => (
-          <li key={organization!.organization_id}>
-            <Link to={"/discovery/$organisationId"} params={{ organisationId: organization!.organization_id }}>
-              <span>{organization!.organization_name}</span>
-              {organization!.organization_id === organisation_id && <span>&nbsp;(Active)</span>}
+        {props.organisations.map((organisation) => (
+          <li key={organisation.organisationId}>
+            <Link to={"/discovery/$organisationId"} params={{ organisationId: organisation.organisationId }}>
+              <span>{organisation.organisationName}</span>
+              {organisation.organisationId === props.organisationId && <span>&nbsp;(Active)</span>}
             </Link>
           </li>
         ))}
@@ -60,7 +69,7 @@ function RouteComponent() {
   return (
     <div>
       <h1>Switch Organisations</h1>
-      <OrgSwitcherList discovered_organizations={data.discovered_organizations} organisation_id={data.organisationId} />
+      <OrgSwitcherList organisations={data.organisations} organisationId={data.organisationId} />
     </div>
   );
 }
