@@ -174,8 +174,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
-        {/* <SidebarMenu>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <TeamSwitcher teams={data.teams} />
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
@@ -189,7 +193,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu> */}
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
