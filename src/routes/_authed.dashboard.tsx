@@ -1,13 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { createFileRoute } from "@tanstack/react-router";
@@ -29,35 +21,38 @@ function RouteComponent() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex justify-between h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-4 h-5">
+        <header className="flex h-16 shrink-0 items-center gap-2">
+          <div className="flex w-full items-center gap-2 px-4 h-5">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
+            <h1 className="text-base font-medium">Documents</h1>
+            {/* 
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">Building Your Application</BreadcrumbLink>
+                  <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  <BreadcrumbPage>Team</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-          <div className="flex items-center gap-2 px-4 h-5">
-            <ThemeToggle />
+            </Breadcrumb> 
+            */}
+            <div className="ml-auto flex items-center gap-2">
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-2">
             <div className="aspect-video rounded-xl bg-muted/50">
-              <ul>
+              {/* <ul>
                 <li>email: {email} </li>
                 <li>memberId: {memberId}</li>
                 <li>organisationId: {organisationId}</li>
                 <li>organisationName: {organisationName}</li>
-              </ul>
+              </ul> */}
             </div>
             <div className="aspect-video rounded-xl bg-muted/50"></div>
           </div>
