@@ -2,6 +2,7 @@ import { useAppSession } from "@/lib/session";
 import { useStytch } from "@/lib/stytch";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { getCookie } from "@tanstack/react-start/server";
 import { MemberSession } from "stytch";
 
 const authenticate = createServerFn().handler(async () => {
@@ -41,11 +42,14 @@ const authenticate = createServerFn().handler(async () => {
     }
   }
 
+  const sidebarState = await getCookie("sidebar_state");
+
   return {
     email: session.data.email,
     organisationId: session.data.organisationId,
     organisationName: session.data.organisationName,
     memberId: session.data.memberId,
+    sidebarOpen: sidebarState == "true",
   };
 });
 

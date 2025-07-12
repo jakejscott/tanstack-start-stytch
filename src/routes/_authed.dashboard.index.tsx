@@ -4,13 +4,9 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { getCookie } from "@tanstack/react-start/server";
 
 const loader = createServerFn().handler(async () => {
-  const sidebarState = await getCookie("sidebar_state");
-  return {
-    sidebarOpen: sidebarState == "true",
-  };
+  return {};
 });
 
 export const Route = createFileRoute("/_authed/dashboard/")({
@@ -19,11 +15,10 @@ export const Route = createFileRoute("/_authed/dashboard/")({
 });
 
 function RouteComponent() {
-  const data = Route.useLoaderData();
-  const { email, memberId, organisationId, organisationName } = Route.useRouteContext();
+  const { sidebarOpen } = Route.useRouteContext();
 
   return (
-    <SidebarProvider defaultOpen={data.sidebarOpen}>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">

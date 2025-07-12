@@ -15,10 +15,10 @@ export const Route = createFileRoute("/_authed/dashboard/team")({
 });
 
 function RouteComponent() {
-  const { email, memberId, organisationId, organisationName } = Route.useRouteContext();
+  const { sidebarOpen } = Route.useRouteContext();
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
