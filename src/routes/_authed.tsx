@@ -53,12 +53,8 @@ export const Route = createFileRoute("/_authed")({
   component: RouteComponent,
   async beforeLoad() {
     const data = await authenticate();
-
     return {
-      organisationId: data.organisationId,
-      organisationName: data.organisationName,
-      memberId: data.memberId,
-      email: data.email,
+      ...data,
     };
   },
 });
