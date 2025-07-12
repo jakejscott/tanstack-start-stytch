@@ -13,7 +13,6 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as ExampleDashboardRouteImport } from './routes/example-dashboard'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscoverySwitchOrganisationRouteImport } from './routes/discovery.switch-organisation'
@@ -32,11 +31,6 @@ const LogoutRoute = LogoutRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExampleDashboardRoute = ExampleDashboardRouteImport.update({
-  id: '/example-dashboard',
-  path: '/example-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedRoute = AuthedRouteImport.update({
@@ -78,7 +72,6 @@ const ApiAuthenticateServerRoute = ApiAuthenticateServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/example-dashboard': typeof ExampleDashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/dashboard': typeof AuthedDashboardRoute
@@ -88,7 +81,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/example-dashboard': typeof ExampleDashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/dashboard': typeof AuthedDashboardRoute
@@ -100,7 +92,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
-  '/example-dashboard': typeof ExampleDashboardRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
@@ -112,7 +103,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/example-dashboard'
     | '/login'
     | '/logout'
     | '/dashboard'
@@ -122,7 +112,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/example-dashboard'
     | '/login'
     | '/logout'
     | '/dashboard'
@@ -133,7 +122,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authed'
-    | '/example-dashboard'
     | '/login'
     | '/logout'
     | '/_authed/dashboard'
@@ -145,7 +133,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
-  ExampleDashboardRoute: typeof ExampleDashboardRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
   DiscoveryOrganisationIdRoute: typeof DiscoveryOrganisationIdRoute
@@ -188,13 +175,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/example-dashboard': {
-      id: '/example-dashboard'
-      path: '/example-dashboard'
-      fullPath: '/example-dashboard'
-      preLoaderRoute: typeof ExampleDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed': {
@@ -267,7 +247,6 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
-  ExampleDashboardRoute: ExampleDashboardRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
   DiscoveryOrganisationIdRoute: DiscoveryOrganisationIdRoute,
