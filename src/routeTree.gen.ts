@@ -18,7 +18,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscoverySwitchOrganisationRouteImport } from './routes/discovery.switch-organisation'
 import { Route as DiscoverySelectOrganisationRouteImport } from './routes/discovery.select-organisation'
 import { Route as DiscoveryOrganisationIdRouteImport } from './routes/discovery.$organisationId'
-import { Route as AuthedDashboardRouteImport } from './routes/_authed.dashboard'
+import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed.dashboard.index'
+import { Route as AuthedDashboardTeamRouteImport } from './routes/_authed.dashboard.team'
 import { ServerRoute as ApiAuthenticateServerRouteImport } from './routes/api/authenticate'
 
 const rootServerRouteImport = createServerRootRoute()
@@ -59,9 +60,14 @@ const DiscoveryOrganisationIdRoute = DiscoveryOrganisationIdRouteImport.update({
   path: '/discovery/$organisationId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedDashboardTeamRoute = AuthedDashboardTeamRouteImport.update({
+  id: '/dashboard/team',
+  path: '/dashboard/team',
   getParentRoute: () => AuthedRoute,
 } as any)
 const ApiAuthenticateServerRoute = ApiAuthenticateServerRouteImport.update({
@@ -74,19 +80,21 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
-  '/dashboard': typeof AuthedDashboardRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
+  '/dashboard/team': typeof AuthedDashboardTeamRoute
+  '/dashboard': typeof AuthedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
-  '/dashboard': typeof AuthedDashboardRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
+  '/dashboard/team': typeof AuthedDashboardTeamRoute
+  '/dashboard': typeof AuthedDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,10 +102,11 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
-  '/_authed/dashboard': typeof AuthedDashboardRoute
   '/discovery/$organisationId': typeof DiscoveryOrganisationIdRoute
   '/discovery/select-organisation': typeof DiscoverySelectOrganisationRoute
   '/discovery/switch-organisation': typeof DiscoverySwitchOrganisationRoute
+  '/_authed/dashboard/team': typeof AuthedDashboardTeamRoute
+  '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,29 +114,32 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/logout'
-    | '/dashboard'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
+    | '/dashboard/team'
+    | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/logout'
-    | '/dashboard'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
+    | '/dashboard/team'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_authed'
     | '/login'
     | '/logout'
-    | '/_authed/dashboard'
     | '/discovery/$organisationId'
     | '/discovery/select-organisation'
     | '/discovery/switch-organisation'
+    | '/_authed/dashboard/team'
+    | '/_authed/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -212,11 +224,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiscoveryOrganisationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/dashboard': {
-      id: '/_authed/dashboard'
+    '/_authed/dashboard/': {
+      id: '/_authed/dashboard/'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthedDashboardRouteImport
+      preLoaderRoute: typeof AuthedDashboardIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/dashboard/team': {
+      id: '/_authed/dashboard/team'
+      path: '/dashboard/team'
+      fullPath: '/dashboard/team'
+      preLoaderRoute: typeof AuthedDashboardTeamRouteImport
       parentRoute: typeof AuthedRoute
     }
   }
@@ -234,11 +253,13 @@ declare module '@tanstack/react-start/server' {
 }
 
 interface AuthedRouteChildren {
-  AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedDashboardTeamRoute: typeof AuthedDashboardTeamRoute
+  AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedDashboardTeamRoute: AuthedDashboardTeamRoute,
+  AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
 }
 
 const AuthedRouteWithChildren =
