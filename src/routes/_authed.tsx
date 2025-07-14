@@ -1,3 +1,8 @@
+import { AppSidebar } from "@/components/app-sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAppSession } from "@/lib/session";
 import { useStytch } from "@/lib/stytch";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
@@ -64,9 +69,5 @@ export const Route = createFileRoute("/_authed")({
 });
 
 function RouteComponent() {
-  return (
-    <div>
-      <Outlet />
-    </div>
-  );
+  return <Outlet />;
 }

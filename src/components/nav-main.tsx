@@ -5,20 +5,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { IconDashboard, IconUsers } from "@tabler/icons-react";
 import { Link, linkOptions, useMatchRoute } from "@tanstack/react-router";
-import { Home, User } from "lucide-react";
 
 const options = linkOptions([
   {
     to: "/dashboard",
-    label: "Home",
+    label: "Dashboard",
     activeOptions: { exact: true },
-    icon: Home,
+    icon: IconDashboard,
   },
   {
     to: "/dashboard/team",
     label: "Team",
-    icon: User,
+    icon: IconUsers,
   },
 ]);
 
