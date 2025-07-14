@@ -3,7 +3,6 @@ import { useStytch } from "@/lib/stytch";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getCookie } from "@tanstack/react-start/server";
-import { MemberSession } from "stytch";
 
 const authenticate = createServerFn().handler(async () => {
   const session = await useAppSession();
@@ -14,13 +13,11 @@ const authenticate = createServerFn().handler(async () => {
 
   const stytch = useStytch();
 
-  let memberSession: MemberSession | null = null;
   try {
-    const authResult = await stytch.sessions.authenticateJwt({ session_jwt: session.data.sessionJwt });
-    memberSession = authResult.member_session;
-    await session.update({ sessionJwt: authResult.session_jwt });
-  } catch (err) {
-    throw redirect({ to: "/" });
+    const { session_jwt } = await stytch.sessions.authenticateJwt({ session_jwt: session.data.sessionJwt });
+    await session.update({ sessionJwt: session_jwt });
+  } catch {
+    throw redirect({ to: "/login" });
   }
 
   const sidebarState = await getCookie("sidebar_state");
