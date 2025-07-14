@@ -1,8 +1,15 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { PageContent } from "@/components/page-content";
 import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,13 +20,17 @@ import { useStytch } from "@/lib/stytch";
 import { formatDate } from "@/lib/utils";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
-import { Loader2, Mail } from "lucide-react";
+import { Check, Clock, Loader2, Mail, MoreHorizontal, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 type InviteMemberForm = {
   email: string;
   role: string;
+};
+
+type DeleteMemberForm = {
+  memberId: string;
 };
 
 export const inviteMemberFn = createServerFn({ method: "POST" })
@@ -30,6 +41,7 @@ export const inviteMemberFn = createServerFn({ method: "POST" })
       throw new Error("No intermediate session");
     }
 
+    // TODO: Only stytch_admin should be able to invite as member.
     if (!ctx.data.email) {
       return { errorMessage: "Email is required" };
     }
@@ -53,6 +65,33 @@ export const inviteMemberFn = createServerFn({ method: "POST" })
     } catch (error) {
       console.log("Error sending invite", { error });
       return { errorMessage: "There was an error inviting user" };
+    }
+
+    return {};
+  });
+
+export const deleteMemberFn = createServerFn({ method: "POST" })
+  .validator((data: DeleteMemberForm) => data)
+  .handler(async (ctx) => {
+    const session = await useAppSession();
+    if (!session.data.intermediateSessionToken) {
+      throw new Error("No intermediate session");
+    }
+
+    // TODO: Only stytch_admin should be able to delete a member.
+    if (!ctx.data.memberId) {
+      return { errorMessage: "Email is required" };
+    }
+
+    try {
+      const stytch = useStytch();
+      await stytch.organizations.members.delete({
+        member_id: ctx.data.memberId,
+        organization_id: session.data.organisationId,
+      });
+    } catch (error) {
+      console.log("Error deleting member", { error });
+      return { errorMessage: "There was an error deleting member" };
     }
 
     return {};
@@ -191,7 +230,50 @@ function InviteTeamMembers() {
 }
 
 function TeamMembers() {
+  const router = useRouter();
   const { members } = Route.useLoaderData();
+
+  const deleteMember = useServerFn(deleteMemberFn);
+
+  const handleDeleteMember = async ({ memberId, email }: { memberId: string; email: string }) => {
+    try {
+      var response = await deleteMember({
+        data: {
+          memberId: memberId,
+        },
+      });
+      if (response.errorMessage) {
+        toast.error(response.errorMessage);
+      } else {
+        toast.success("Member deleted", { description: `Member ${email} was deleted.` });
+        router.invalidate();
+      }
+    } catch (error) {
+      toast("There was an error deleting the member");
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "invited":
+        return (
+          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+            <Clock className="w-3 h-3 mr-1" />
+            Invited
+          </Badge>
+        );
+      case "active":
+        return (
+          <Badge variant="outline" className="text-green-600 border-green-600">
+            <Check className="w-3 h-3 mr-1" />
+            Active
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -202,27 +284,54 @@ function TeamMembers() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="">Email</TableHead>
-              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Roles</TableHead>
               <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
+              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {members.map((member) => (
-              <TableRow key={member.member_id}>
-                <TableCell className="font-medium">{member.email_address}</TableCell>
-                <TableCell>{member.name}</TableCell>
-                <TableCell>{member.status}</TableCell>
-                <TableCell className="whitespace-normal">
-                  {member.roles.map((role) => role.role_id).join(", ")}
-                </TableCell>
-                <TableCell>{formatDate(member.created_at!)}</TableCell>
-                <TableCell>{formatDate(member.updated_at!)}</TableCell>
-              </TableRow>
-            ))}
+            {members
+              .filter((x) => x.status == "invited")
+              .map((member) => (
+                <TableRow key={member.member_id}>
+                  <TableCell className="font-medium">{member.email_address}</TableCell>
+                  <TableCell>
+                    {member.roles.map((role) => {
+                      return (
+                        <Badge className="mr-2" key={role.role_id} variant="secondary">
+                          {role.role_id}
+                        </Badge>
+                      );
+                    })}
+                  </TableCell>
+                  <TableCell className="capitalize">{getStatusBadge(member.status)}</TableCell>
+                  <TableCell>{formatDate(member.created_at!)}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            await handleDeleteMember({
+                              email: member.email_address,
+                              memberId: member.member_id,
+                            });
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Cancel
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </CardContent>
