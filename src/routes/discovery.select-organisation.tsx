@@ -55,7 +55,7 @@ export const createOrganisation = createServerFn({ method: "POST" })
         email_allowed_domains: [],
         organization_name: ctx.data.organisationName,
         organization_slug: organisationSlug,
-        session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
+        // session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
         mfa_policy: "OPTIONAL",
       });
     } catch (e) {

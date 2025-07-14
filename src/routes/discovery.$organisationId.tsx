@@ -20,7 +20,7 @@ const loader = createServerFn()
       const exchangeSessionResult = await stytch.sessions.exchange({
         organization_id: data.organisationId,
         session_jwt: session.data.sessionJwt,
-        session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
+        // session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
       });
 
       // console.log("Session exchange result", exchangeSessionResult);
@@ -48,12 +48,9 @@ const loader = createServerFn()
     }
 
     if (session.data.intermediateSessionToken) {
-      // console.log("switching orgs using intermediate_session_token");
-
       const { session_jwt, organization, member } = await stytch.discovery.intermediateSessions.exchange({
         intermediate_session_token: session.data.intermediateSessionToken,
         organization_id: data.organisationId,
-        session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
       });
 
       if (!session_jwt) {
@@ -70,13 +67,9 @@ const loader = createServerFn()
         memberId: member.member_id,
       });
 
-      throw redirect({
-        to: "/dashboard",
-        statusCode: 307,
-      });
+      throw redirect({ to: "/dashboard", statusCode: 307 });
     }
 
-    // console.log("no session tokens, todo redirect to logout");
     throw redirect({ to: "/" });
   });
 
