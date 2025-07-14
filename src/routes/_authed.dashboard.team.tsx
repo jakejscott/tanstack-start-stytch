@@ -232,6 +232,7 @@ function InviteTeamMembers() {
 function TeamMembers() {
   const router = useRouter();
   const { members } = Route.useLoaderData();
+  const invites = members.filter((x) => x.status == "invited");
 
   const deleteMember = useServerFn(deleteMemberFn);
 
@@ -281,20 +282,25 @@ function TeamMembers() {
         <CardDescription>Manage invitations that have been sent but not yet accepted.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {members
-              .filter((x) => x.status == "invited")
-              .map((member) => (
+        {invites.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No pending invitations</p>
+            <p className="text-sm">Invitations you send will appear here.</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {invites.map((member) => (
                 <TableRow key={member.member_id}>
                   <TableCell className="font-medium">{member.email_address}</TableCell>
                   <TableCell>
@@ -332,8 +338,9 @@ function TeamMembers() {
                   </TableCell>
                 </TableRow>
               ))}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );
