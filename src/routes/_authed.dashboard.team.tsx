@@ -129,7 +129,7 @@ function InviteTeamMembers() {
         toast.error(response.errorMessage);
       } else {
         setStatus("success");
-        toast.success("Invitation sent!", { description: `Invitation sent to ${email} with 'member' role.` });
+        toast.success("Invitation sent!", { description: `Invitation sent to ${email} with ${role} role.` });
         setRole("stytch_member");
         setEmail("");
         router.invalidate();
