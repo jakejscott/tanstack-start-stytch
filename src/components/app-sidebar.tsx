@@ -7,10 +7,11 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
+import { AudioWaveform, Command, GalleryVerticalEnd, Route } from "lucide-react";
 import * as React from "react";
 import { NavMain } from "./nav-main";
-import { TeamSwitcher } from "./team-switcher";
+import { TeamSwitcher, TeamSwitcherTeam } from "./team-switcher";
+import { DiscoveredOrganisation } from "@/lib/stytch";
 
 const data = {
   user: {
@@ -37,13 +38,32 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export type AppSidebarProps = {
+  activeOrganisationId: string;
+  organisations: Array<DiscoveredOrganisation>;
+};
+
+export function AppSidebar({
+  activeOrganisationId,
+  organisations,
+  ...props
+}: AppSidebarProps & React.ComponentProps<typeof Sidebar>) {
+  const teams: TeamSwitcherTeam[] = organisations.map((org) => ({
+    name: org.organisationName,
+    plan: "Free",
+    logo: Command,
+    isActive: org.organisationId == activeOrganisationId,
+    organisationId: org.organisationId,
+  }));
+
+  console.log("teams", teams);
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <TeamSwitcher teams={data.teams} />
+            <TeamSwitcher teams={teams} />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

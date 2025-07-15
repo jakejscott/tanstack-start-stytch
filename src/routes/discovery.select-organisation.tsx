@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppSession } from "@/lib/session";
-import { useStytch } from "@/lib/stytch";
+import { DiscoveredOrganisation, discoverOrganisations, useStytch } from "@/lib/stytch";
 import { cn, createSlug, toDomain } from "@/lib/utils";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
@@ -14,15 +14,6 @@ import { B2BDiscoveryOrganizationsCreateResponse, StytchError } from "stytch";
 
 export type CreateOrganisationData = {
   organisationName?: string;
-};
-
-type DiscoveredOrganisation = {
-  organisationId: string;
-  organisationName: string;
-  organisationSlug: string;
-  membershipType: string;
-  membershipMemberId: string;
-  membershipRoles: string[];
 };
 
 export const createOrganisation = createServerFn({ method: "POST" })
@@ -108,11 +99,13 @@ export const createOrganisation = createServerFn({ method: "POST" })
       throw new Error("session_jwt was empty, probably needs MFA");
     }
 
-    await session.clear();
     await session.update({
       sessionJwt: session_jwt,
+      intermediateSessionToken: undefined,
       email: member.email_address,
       organisationId: organization.organization_id,
+      organisationName: organization.organization_name,
+      memberId: member.member_id,
     });
 
     return {
@@ -126,22 +119,11 @@ const loader = createServerFn().handler(async () => {
     throw redirect({ to: "/" });
   }
 
-  const stytch = useStytch();
-
   try {
-    const { discovered_organizations } = await stytch.discovery.organizations.list({
+    const organisations = await discoverOrganisations({
       intermediate_session_token: session.data.intermediateSessionToken,
       session_jwt: undefined,
     });
-
-    const organisations: DiscoveredOrganisation[] = discovered_organizations.map((item) => ({
-      organisationId: item.organization!.organization_id,
-      organisationName: item.organization!.organization_name,
-      organisationSlug: item.organization!.organization_slug,
-      membershipType: item.membership!.type,
-      membershipMemberId: item.membership!.member!.member_id,
-      membershipRoles: item.membership!.member!.roles.map((x) => x.role_id),
-    }));
 
     return {
       organisations: organisations,

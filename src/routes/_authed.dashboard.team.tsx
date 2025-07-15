@@ -37,9 +37,6 @@ export const inviteMemberFn = createServerFn({ method: "POST" })
   .validator((data: InviteMemberForm) => data)
   .handler(async (ctx) => {
     const session = await useAppSession();
-    if (!session.data.intermediateSessionToken) {
-      throw new Error("No intermediate session");
-    }
 
     // TODO: Only stytch_admin should be able to invite as member.
     if (!ctx.data.email) {
@@ -74,9 +71,6 @@ export const deleteMemberFn = createServerFn({ method: "POST" })
   .validator((data: DeleteMemberForm) => data)
   .handler(async (ctx) => {
     const session = await useAppSession();
-    if (!session.data.intermediateSessionToken) {
-      throw new Error("No intermediate session");
-    }
 
     // TODO: Only stytch_admin should be able to delete a member.
     if (!ctx.data.memberId) {
@@ -126,10 +120,10 @@ export const Route = createFileRoute("/_authed/dashboard/team")({
 });
 
 function RouteComponent() {
-  const { sidebarOpen } = Route.useRouteContext();
+  const { sidebarOpen, organisations, organisationId } = Route.useRouteContext();
   return (
     <SidebarProvider defaultOpen={sidebarOpen}>
-      <AppSidebar variant="inset" />
+      <AppSidebar activeOrganisationId={organisationId} organisations={organisations} variant="inset" />
       <SidebarInset>
         <PageHeader heading="Team" />
         <PageContent>

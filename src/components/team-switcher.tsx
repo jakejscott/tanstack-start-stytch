@@ -10,20 +10,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import { useRouter } from "@tanstack/react-router";
 import { ChevronsUpDown, Plus } from "lucide-react";
 import * as React from "react";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
-}) {
+export type TeamSwitcherTeam = {
+  organisationId: string;
+  name: string;
+  logo: React.ElementType;
+  plan: string;
+  isActive: boolean;
+};
+
+export function TeamSwitcher({ teams }: { teams: TeamSwitcherTeam[] }) {
+  const router = useRouter();
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const [activeTeam, setActiveTeam] = React.useState(teams.find((x) => x.isActive));
 
   if (!activeTeam) {
     return null;
@@ -54,7 +56,19 @@ export function TeamSwitcher({
       >
         <DropdownMenuLabel className="text-xs text-muted-foreground">Teams</DropdownMenuLabel>
         {teams.map((team, index) => (
-          <DropdownMenuItem key={team.name} onClick={() => setActiveTeam(team)} className="gap-2 p-2">
+          <DropdownMenuItem
+            key={team.name}
+            onClick={() => {
+              setActiveTeam(team);
+              router.navigate({
+                to: "/discovery/$organisationId",
+                params: {
+                  organisationId: team.organisationId,
+                },
+              });
+            }}
+            className="gap-2 p-2"
+          >
             <div className="flex size-6 items-center justify-center rounded-sm border">
               <team.logo className="size-4 shrink-0" />
             </div>

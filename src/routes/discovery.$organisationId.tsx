@@ -15,26 +15,20 @@ const loader = createServerFn()
     const stytch = useStytch();
 
     if (session.data.sessionJwt) {
-      // console.log("switching orgs using session_jwt", session.data);
-
-      const exchangeSessionResult = await stytch.sessions.exchange({
+      const { session_jwt, organization, member } = await stytch.sessions.exchange({
         organization_id: data.organisationId,
         session_jwt: session.data.sessionJwt,
         // session_duration_minutes: parseInt(process.env.SESSION_DURATION_MINUTES!),
       });
-
-      // console.log("Session exchange result", exchangeSessionResult);
-
-      const { session_jwt, organization, member } = exchangeSessionResult;
 
       if (!session_jwt) {
         // TODO: handle MFA
         throw new Error("Need to handle MFA");
       }
 
-      await session.clear();
       await session.update({
         sessionJwt: session_jwt,
+        intermediateSessionToken: undefined,
         email: member.email_address,
         organisationId: organization.organization_id,
         organisationName: organization.organization_name,
@@ -58,9 +52,9 @@ const loader = createServerFn()
         throw new Error("Need to handle MFA");
       }
 
-      await session.clear();
       await session.update({
         sessionJwt: session_jwt,
+        intermediateSessionToken: undefined,
         email: member.email_address,
         organisationId: organization.organization_id,
         organisationName: organization.organization_name,

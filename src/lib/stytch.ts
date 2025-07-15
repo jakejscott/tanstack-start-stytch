@@ -46,3 +46,27 @@ export const formatOAuthStartURL = (redirectDomain: string, provider: string, or
   const redirectURL = redirectDomain + "/api/authenticate";
   return `${stytchEnv}v1/b2b/public/oauth/${provider}/start?public_token=${publicToken}&slug=${org_slug}&login_redirect_url=${redirectURL}&signup_redirect_url=${redirectURL}`;
 };
+
+export const discoverOrganisations = async ({
+  session_jwt,
+  intermediate_session_token,
+}: {
+  session_jwt: string | undefined;
+  intermediate_session_token: string | undefined;
+}): Promise<Array<DiscoveredOrganisation>> => {
+  const stytch = useStytch();
+
+  const { discovered_organizations } = await stytch.discovery.organizations.list({
+    session_jwt: session_jwt,
+    intermediate_session_token: intermediate_session_token,
+  });
+
+  return discovered_organizations.map((item) => ({
+    organisationId: item.organization!.organization_id,
+    organisationName: item.organization!.organization_name,
+    organisationSlug: item.organization!.organization_slug,
+    membershipType: item.membership!.type,
+    membershipMemberId: item.membership!.member!.member_id,
+    membershipRoles: item.membership!.member!.roles.map((x) => x.role_id),
+  }));
+};

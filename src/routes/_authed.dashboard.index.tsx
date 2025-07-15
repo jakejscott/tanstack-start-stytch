@@ -10,10 +10,10 @@ export const Route = createFileRoute("/_authed/dashboard/")({
 });
 
 function RouteComponent() {
-  const { sidebarOpen } = Route.useRouteContext();
+  const { sidebarOpen, organisations, organisationId } = Route.useRouteContext();
   return (
     <SidebarProvider defaultOpen={sidebarOpen}>
-      <AppSidebar variant="inset" />
+      <AppSidebar variant="inset" organisations={organisations} activeOrganisationId={organisationId} />
       <SidebarInset>
         <PageHeader heading="Dashboard" />
         <PageContent>
