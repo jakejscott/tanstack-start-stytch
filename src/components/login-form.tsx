@@ -67,7 +67,7 @@ export function LoginForm(props: { googleOAuthDiscoveryStartUrl: string }) {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Login with your Google or Github account</CardDescription>
+          <CardDescription>Login with your Google account</CardDescription>
         </CardHeader>
         <CardContent>
           <div>

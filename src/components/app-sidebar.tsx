@@ -56,8 +56,6 @@ export function AppSidebar({
     organisationId: org.organisationId,
   }));
 
-  console.log("teams", teams);
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
